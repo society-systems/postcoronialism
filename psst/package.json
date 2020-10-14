@@ -9,6 +9,7 @@
     "build": "tsc",
     "start": "node lib/index.js"
   },
+  "bin": "./lib/index.js",
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -22,6 +23,7 @@
   "dependencies": {
     "better-sqlite3": "^7.1.1",
     "body-parser": "^1.19.0",
+    "commander": "^6.1.0",
     "connect": "^3.7.0",
     "cors": "^2.8.5",
     "jayson": "^3.3.4",

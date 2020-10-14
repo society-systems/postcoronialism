@@ -1,5 +1,5 @@
 import {
-  toHexString,
+  uint8ArrayToHexString,
   sha256,
   uint32toUint8Array,
   uint8ArrayToUint32,
@@ -99,7 +99,7 @@ export function join(
 ) {
   verifyInvite(db, invite);
   db.prepare(SQL_USERS_INSERT).run({
-    publicKey: toHexString(publicKey),
+    publicKey: uint8ArrayToHexString(publicKey),
     role,
     invite: sha256(invite),
   });
@@ -107,7 +107,7 @@ export function join(
 
 export function addGenesisAdmin(db: Database, publicKey: Uint8Array) {
   db.prepare(SQL_USERS_INSERT).run({
-    publicKey: toHexString(publicKey),
+    publicKey: uint8ArrayToHexString(publicKey),
     role: USER_ROLE.ADMIN,
     invite: "genesis",
   });
@@ -116,13 +116,13 @@ export function addGenesisAdmin(db: Database, publicKey: Uint8Array) {
 export function getUser(db: Database, publicKey: Uint8Array) {
   return db
     .prepare(SQL_USERS_GET_BY_PUBLIC_KEY)
-    .get({ publicKey: toHexString(publicKey) });
+    .get({ publicKey: uint8ArrayToHexString(publicKey) });
 }
 
 export function hasRole(db: Database, publicKey: Uint8Array, role: USER_ROLE) {
   return (
     db
       .prepare(SQL_USERS_HAS_ROLE)
-      .get({ publicKey: toHexString(publicKey), role }).count === 1
+      .get({ publicKey: uint8ArrayToHexString(publicKey), role }).count === 1
   );
 }

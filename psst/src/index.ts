@@ -1,21 +1,30 @@
-import jayson from "jayson";
-import cors from "cors";
-import connect from "connect";
-import { json as jsonParser } from "body-parser";
-import banner from "./banner";
-
+import { Command } from "commander";
+import { addGenesisAdmin } from "./auth";
 import { getContext } from "./context";
-import rpc from "./rpc";
+import { hexStringToUint8Array } from "./f";
 
-const context = getContext();
-const app = connect();
-const server = new jayson.Server(rpc(context));
+import { listen } from "./server";
 
-// FIXME: not sure about this casting
-app.use(cors({ methods: ["POST"] }) as connect.HandleFunction);
-app.use(jsonParser());
-app.use(server.middleware());
-console.log(banner);
-console.log("Sqlite database path:", context.location);
-console.log("JSONRPC server listening at port:", context.port);
-app.listen(context.port);
+const program = new Command();
+
+program.name("psst");
+program.version("0.0.1");
+
+program
+  .command("daemon")
+  .description("run the psst daemon")
+  .action(() => {
+    const context = getContext();
+    listen(context);
+  });
+
+program
+  .command("addAdmin <publicKey>")
+  .description("Add an admin")
+  .action((publicKey: string) => {
+    const context = getContext();
+    addGenesisAdmin(context.db, hexStringToUint8Array(publicKey));
+    console.log(`Added ${publicKey} to the admin list`);
+  });
+
+program.parse(process.argv);

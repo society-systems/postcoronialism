@@ -1,7 +1,11 @@
 import crypto from "crypto";
 
-export function toHexString(i: Uint8Array) {
+export function uint8ArrayToHexString(i: Uint8Array) {
   return Buffer.from(i).toString("hex");
+}
+
+export function hexStringToUint8Array(s: string) {
+  return Uint8Array.from(Buffer.from(s, "hex"));
 }
 
 export function sha256(data: crypto.BinaryLike) {
