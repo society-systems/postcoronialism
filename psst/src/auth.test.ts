@@ -4,7 +4,6 @@ import {
   verify,
   addUser,
   USER_ROLE,
-  getUser,
   hasRole,
   addGenesisAdmin,
   invite,
