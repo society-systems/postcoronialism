@@ -7,6 +7,12 @@ import {
 import { Database } from "better-sqlite3";
 import nacl from "tweetnacl";
 
+import {
+  InvalidSignature,
+  InviteExpired,
+  InvalidInviteSignature,
+} from "./errors";
+
 export enum USER_ROLE {
   ADMIN,
   MEMBER,
@@ -72,14 +78,14 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
   const expiry = new Date(uint8ArrayToUint32(expiryBytes) * 1000);
 
   if (!verify(message, signature, signer)) {
-    throw new Error("Invalid signature");
+    throw new InvalidSignature();
   }
   if (expiry < new Date()) {
-    throw new Error("Invite expired");
+    throw new InviteExpired();
   }
 
   if (!hasRole(db, signer, USER_ROLE.ADMIN)) {
-    throw new Error("Invite is not signed by an admin");
+    throw new InvalidInviteSignature();
   }
 
   return signer;

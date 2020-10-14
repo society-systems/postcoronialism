@@ -9,7 +9,12 @@ import {
   invite,
   verifyInvite,
 } from "./auth";
-import { init } from "./init";
+import { init } from "./db";
+import {
+  InvalidInviteSignature,
+  InvalidSignature,
+  InviteExpired,
+} from "./errors";
 
 describe("Verify", () => {
   test("accepts a valid signature", () => {
@@ -33,7 +38,7 @@ describe("User management", () => {
   let db: Database;
 
   beforeEach(() => {
-    db = init().db;
+    db = init();
     addGenesisAdmin(db, adminKeyPair.publicKey);
   });
 
@@ -53,7 +58,7 @@ describe("Invite", () => {
   let db: Database;
 
   beforeEach(() => {
-    db = init().db;
+    db = init();
     addGenesisAdmin(db, adminKeyPair.publicKey);
   });
 
@@ -69,14 +74,14 @@ describe("Invite", () => {
     expiry.setDate(expiry.getDate() + 7);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
     invitation[32] = USER_ROLE.ADMIN;
-    expect(() => verifyInvite(db, invitation)).toThrow("Invalid signature");
+    expect(() => verifyInvite(db, invitation)).toThrow(InvalidSignature);
   });
 
   test("is not valid if expired", () => {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() - 1);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
-    expect(() => verifyInvite(db, invitation)).toThrow("Invite expired");
+    expect(() => verifyInvite(db, invitation)).toThrow(InviteExpired);
   });
 
   test("is not valid if not signed by an admin", () => {
@@ -84,8 +89,6 @@ describe("Invite", () => {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);
     const invitation = invite(keyPair.secretKey, USER_ROLE.MEMBER, expiry);
-    expect(() => verifyInvite(db, invitation)).toThrow(
-      "Invite is not signed by an admin"
-    );
+    expect(() => verifyInvite(db, invitation)).toThrow(InvalidInviteSignature);
   });
 });
