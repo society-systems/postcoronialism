@@ -1,4 +1,9 @@
-import { toHexString, sha256 } from "./f";
+import {
+  toHexString,
+  sha256,
+  uint32toUint8Array,
+  uint8ArrayToUint32,
+} from "./f";
 import { Database } from "better-sqlite3";
 import nacl from "tweetnacl";
 
@@ -45,16 +50,39 @@ export function verify(
   return nacl.sign.detached.verify(payload, signature, publicKey);
 }
 
-// Generate an invite. An invite is 129 byte long and has the following form:
-// nonce(32bytes) + role(1byte) + signature(64bytes) + publicKey(32bytes)
-export function invite(secretKey: Uint8Array, role: USER_ROLE) {
+// Generate an invite. An invite is 133-byte long and has the following form:
+// nonce(32bytes) + role(1byte) + expiry(4bytes) + signature(64bytes) + publicKey(32bytes)
+export function invite(secretKey: Uint8Array, role: USER_ROLE, expiry: Date) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
   const nonce = nacl.randomBytes(32);
-  const roleByte = new Uint8Array(1);
-  const message = Buffer.concat([nonce, roleByte]);
-  roleByte[0] = role;
+  const roleByte = Uint8Array.from([role]);
+  const expiryBytes = uint32toUint8Array(Math.round(expiry.getTime() / 1000));
+
+  const message = Buffer.concat([nonce, roleByte, expiryBytes]);
   const signature = nacl.sign.detached(message, secretKey);
   return Uint8Array.from(Buffer.concat([message, signature, publicKey]));
+}
+
+export function verifyInvite(db: Database, invite: Uint8Array) {
+  const message = invite.slice(0, 37);
+  const signature = invite.slice(37, 101);
+  const signer = invite.slice(101, 133);
+
+  const expiryBytes = invite.slice(33, 37);
+  const expiry = new Date(uint8ArrayToUint32(expiryBytes) * 1000);
+
+  if (!verify(message, signature, signer)) {
+    throw new Error("Invalid signature");
+  }
+  if (expiry < new Date()) {
+    throw new Error("Invite expired");
+  }
+
+  if (!hasRole(db, signer, USER_ROLE.ADMIN)) {
+    throw new Error("Invite is not signed by an admin");
+  }
+
+  return signer;
 }
 
 export function addUser(
@@ -63,18 +91,7 @@ export function addUser(
   role: USER_ROLE,
   invite: Uint8Array
 ) {
-  const message = invite.slice(0, 33);
-  const signature = invite.slice(33, 97);
-  const signer = invite.slice(97, 129);
-
-  if (!verify(message, signature, signer)) {
-    throw new Error("Invalid signature");
-  }
-
-  if (!hasRole(db, signer, USER_ROLE.ADMIN)) {
-    throw new Error("Invite is not signed by an admin");
-  }
-
+  verifyInvite(db, invite);
   db.prepare(SQL_USERS_INSERT).run({
     publicKey: toHexString(publicKey),
     role,

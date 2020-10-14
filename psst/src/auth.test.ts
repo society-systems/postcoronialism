@@ -8,6 +8,7 @@ import {
   hasRole,
   addGenesisAdmin,
   invite,
+  verifyInvite,
 } from "./auth";
 import { init } from "./init";
 
@@ -37,14 +38,55 @@ describe("User management", () => {
     addGenesisAdmin(db, adminKeyPair.publicKey);
   });
 
-  //test('registers a new user', async() => {
-  //  const keyPair = nacl.sign.keyPair();
-  //});
   test("adds a user with a specific role", async () => {
-    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER);
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
     const userKeyPair = nacl.sign.keyPair();
     addUser(db, userKeyPair.publicKey, USER_ROLE.MEMBER, invitation);
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.MEMBER)).toBeTruthy();
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.ADMIN)).toBeFalsy();
+  });
+});
+
+describe("Invite", () => {
+  const adminKeyPair = nacl.sign.keyPair();
+  let db: Database;
+
+  beforeEach(() => {
+    db = init().db;
+    addGenesisAdmin(db, adminKeyPair.publicKey);
+  });
+
+  test("is valid if not expired", () => {
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
+    expect(verifyInvite(db, invitation)).toEqual(adminKeyPair.publicKey);
+  });
+
+  test("is not valid if signature is wrong", () => {
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
+    invitation[32] = USER_ROLE.ADMIN;
+    expect(() => verifyInvite(db, invitation)).toThrow("Invalid signature");
+  });
+
+  test("is not valid if expired", () => {
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() - 1);
+    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
+    expect(() => verifyInvite(db, invitation)).toThrow("Invite expired");
+  });
+
+  test("is not valid if not signed by an admin", () => {
+    const keyPair = nacl.sign.keyPair();
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const invitation = invite(keyPair.secretKey, USER_ROLE.MEMBER, expiry);
+    expect(() => verifyInvite(db, invitation)).toThrow(
+      "Invite is not signed by an admin"
+    );
   });
 });
