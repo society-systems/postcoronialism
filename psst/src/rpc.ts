@@ -1,4 +1,4 @@
-import { addUser } from "./auth";
+import { join } from "./auth";
 import { IContext } from "./context";
 import { PsstError } from "./errors";
 
@@ -21,6 +21,6 @@ function callbackify(f: any) {
 
 export default function rpc(context: IContext) {
   return {
-    addUser: callbackify(addUser.bind(null, context.db)),
+    join: callbackify(join.bind(null, context.db)),
   };
 }

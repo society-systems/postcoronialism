@@ -2,7 +2,7 @@ import { Database } from "better-sqlite3";
 import nacl from "tweetnacl";
 import {
   verify,
-  addUser,
+  join,
   USER_ROLE,
   hasRole,
   addGenesisAdmin,
@@ -47,7 +47,7 @@ describe("User management", () => {
     expiry.setDate(expiry.getDate() + 7);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
     const userKeyPair = nacl.sign.keyPair();
-    addUser(db, userKeyPair.publicKey, USER_ROLE.MEMBER, invitation);
+    join(db, userKeyPair.publicKey, USER_ROLE.MEMBER, invitation);
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.MEMBER)).toBeTruthy();
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.ADMIN)).toBeFalsy();
   });

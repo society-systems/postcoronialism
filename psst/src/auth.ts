@@ -91,7 +91,7 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
   return signer;
 }
 
-export function addUser(
+export function join(
   db: Database,
   publicKey: Uint8Array,
   role: USER_ROLE,
