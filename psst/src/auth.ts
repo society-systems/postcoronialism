@@ -62,7 +62,7 @@ export function invite(secretKey: Uint8Array, role: USER_ROLE, expiry: Date) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
   const nonce = nacl.randomBytes(32);
   const roleByte = Uint8Array.from([role]);
-  const expiryBytes = uint32toUint8Array(Math.round(expiry.getTime() / 1000));
+  const expiryBytes = uint32toUint8Array(Math.floor(expiry.getTime() / 1000));
 
   const message = Buffer.concat([nonce, roleByte, expiryBytes]);
   const signature = nacl.sign.detached(message, secretKey);
@@ -74,8 +74,9 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
   const signature = invite.slice(37, 101);
   const signer = invite.slice(101, 133);
 
-  const expiryBytes = invite.slice(33, 37);
-  const expiry = new Date(uint8ArrayToUint32(expiryBytes) * 1000);
+  const nonce = invite.slice(0, 32);
+  const role = invite.slice(32, 33)[0];
+  const expiry = new Date(uint8ArrayToUint32(invite.slice(33, 37)) * 1000);
 
   if (!verify(message, signature, signer)) {
     throw new InvalidSignature();
@@ -88,19 +89,14 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
     throw new InvalidInviteSignature();
   }
 
-  return signer;
+  return { signer, nonce, role, expiry };
 }
 
-export function join(
-  db: Database,
-  publicKey: Uint8Array,
-  role: USER_ROLE,
-  invite: Uint8Array
-) {
-  verifyInvite(db, invite);
+export function join(db: Database, publicKey: Uint8Array, invite: Uint8Array) {
+  const invitation = verifyInvite(db, invite);
   db.prepare(SQL_USERS_INSERT).run({
     publicKey: uint8ArrayToHexString(publicKey),
-    role,
+    role: invitation.role,
     invite: sha256(invite),
   });
 }

@@ -47,7 +47,7 @@ describe("User management", () => {
     expiry.setDate(expiry.getDate() + 7);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
     const userKeyPair = nacl.sign.keyPair();
-    join(db, userKeyPair.publicKey, USER_ROLE.MEMBER, invitation);
+    join(db, userKeyPair.publicKey, invitation);
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.MEMBER)).toBeTruthy();
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.ADMIN)).toBeFalsy();
   });
@@ -65,8 +65,12 @@ describe("Invite", () => {
   test("is valid if not expired", () => {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);
+    expiry.setMilliseconds(0);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
-    expect(verifyInvite(db, invitation)).toEqual(adminKeyPair.publicKey);
+    const verifiedInvitation = verifyInvite(db, invitation);
+    expect(verifiedInvitation.signer).toEqual(adminKeyPair.publicKey);
+    expect(verifiedInvitation.role).toEqual(USER_ROLE.MEMBER);
+    expect(verifiedInvitation.expiry).toEqual(expiry);
   });
 
   test("is not valid if signature is wrong", () => {
