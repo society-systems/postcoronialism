@@ -1,6 +1,7 @@
 import { join } from "./auth";
 import { IContext } from "./context";
 import { PsstError } from "./errors";
+import { hexStringToUint8Array } from "./f";
 
 function callbackify(f: any) {
   return (args: any, callback: any) => {
@@ -20,7 +21,13 @@ function callbackify(f: any) {
 }
 
 export default function rpc(context: IContext) {
+  const { db } = context;
+
+  function rpcJoin(publicKey: string, invite: string) {
+    join(db, hexStringToUint8Array(publicKey), hexStringToUint8Array(invite));
+  }
+
   return {
-    join: callbackify(join.bind(null, context.db)),
+    join: callbackify(rpcJoin),
   };
 }
