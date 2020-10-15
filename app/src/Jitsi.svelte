@@ -9,7 +9,7 @@
     const options = {
         roomName: 'postcoronialism',
         width: "100%",
-        height: 400,
+        height: "700px",
         parentNode: element,
         userInfo: {
           displayName: name
