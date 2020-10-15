@@ -1,6 +1,6 @@
 import jayson from "jayson";
 import cors from "cors";
-import connect from "connect";
+import express from "express";
 import { json as jsonParser } from "body-parser";
 import banner from "./banner";
 
@@ -8,11 +8,9 @@ import { IContext } from "./context";
 import rpc from "./rpc";
 
 export function listen(context: IContext) {
-  const app = connect();
+  const app = express();
   const server = new jayson.Server(rpc(context));
-
-  // FIXME: not sure about this casting
-  app.use(cors({ methods: ["POST"] }) as connect.HandleFunction);
+  app.use(cors({ methods: ["POST"] }));
   app.use(jsonParser());
   app.use(server.middleware());
   console.log(banner);
