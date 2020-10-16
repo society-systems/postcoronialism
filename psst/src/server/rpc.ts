@@ -1,12 +1,13 @@
-import { join } from "./auth";
-import { IContext } from "./context";
-import { PsstError } from "./errors";
-import { hexStringToUint8Array } from "./f";
+import { join } from "../auth";
+import { IContext } from "../context";
+import { PsstError } from "../errors";
+import { hexStringToUint8Array } from "../f";
+import { IRPCContext } from "./jsonrpc";
 
 function callbackify(f: any) {
-  return (args: any, callback: any) => {
+  return (args: any, context: IRPCContext, callback: any) => {
     try {
-      callback(null, f(...args));
+      callback(null, f(context.user, ...args));
     } catch (error) {
       if (error instanceof PsstError) {
         callback({
@@ -25,6 +26,10 @@ export default function rpc(context: IContext) {
 
   function rpcJoin(publicKey: string, invite: string) {
     join(db, hexStringToUint8Array(publicKey), hexStringToUint8Array(invite));
+  }
+
+  function rpcReadSecrets(publicKey: string) {
+    //join(db, hexStringToUint8Array(publicKey), hexStringToUint8Array(invite));
   }
 
   return {

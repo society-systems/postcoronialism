@@ -30,3 +30,11 @@ export class InvalidInviteSignature extends PsstError {
     Object.setPrototypeOf(this, InvalidInviteSignature.prototype);
   }
 }
+
+export class Unauthorized extends PsstError {
+  constructor() {
+    super("I'm sorry Dave, I'm afraid I can't do that");
+    this.code = -32403;
+    Object.setPrototypeOf(this, Unauthorized.prototype);
+  }
+}

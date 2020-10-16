@@ -8,6 +8,7 @@ import {
   addGenesisAdmin,
   invite,
   verifyInvite,
+  getUser,
 } from "./auth";
 import { init } from "./db";
 import {
@@ -15,6 +16,7 @@ import {
   InvalidSignature,
   InviteExpired,
 } from "./errors";
+import { uint8ArrayToHexString } from "./f";
 
 describe("Verify", () => {
   test("accepts a valid signature", () => {
@@ -42,7 +44,7 @@ describe("User management", () => {
     addGenesisAdmin(db, adminKeyPair.publicKey);
   });
 
-  test("adds a user with a specific role", async () => {
+  test("adds a user with a specific role", () => {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);
     const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
@@ -50,6 +52,33 @@ describe("User management", () => {
     join(db, userKeyPair.publicKey, invitation);
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.MEMBER)).toBeTruthy();
     expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.ADMIN)).toBeFalsy();
+  });
+
+  test("doesn't allow to replay an invite", () => {
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const invitation = invite(adminKeyPair.secretKey, USER_ROLE.MEMBER, expiry);
+    const userKeyPair = nacl.sign.keyPair();
+    join(db, userKeyPair.publicKey, invitation);
+    expect(hasRole(db, userKeyPair.publicKey, USER_ROLE.MEMBER)).toBeTruthy();
+
+    const user2KeyPair = nacl.sign.keyPair();
+    expect(() => join(db, user2KeyPair.publicKey, invitation)).toThrow(
+      "UNIQUE constraint failed"
+    );
+  });
+
+  test("gets a user that exists", () => {
+    expect(getUser(db, adminKeyPair.publicKey)).toEqual({
+      invite: "genesis",
+      publicKey: uint8ArrayToHexString(adminKeyPair.publicKey),
+      role: USER_ROLE.ADMIN,
+    });
+  });
+
+  test("gets a user that doesn't exists", () => {
+    const keyPair = nacl.sign.keyPair();
+    expect(getUser(db, keyPair.publicKey)).toBeUndefined();
   });
 });
 

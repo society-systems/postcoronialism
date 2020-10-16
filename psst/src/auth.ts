@@ -122,3 +122,12 @@ export function hasRole(db: Database, publicKey: Uint8Array, role: USER_ROLE) {
       .get({ publicKey: uint8ArrayToHexString(publicKey), role }).count === 1
   );
 }
+
+export function getRole(db: Database, publicKey: Uint8Array) {
+  const user = getUser(db, publicKey);
+  if (user) {
+    return user.role;
+  } else {
+    return null;
+  }
+}
