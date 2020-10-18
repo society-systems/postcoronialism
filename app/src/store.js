@@ -65,6 +65,8 @@ export const secrets = derived(
   async ([$keyPair, $role], set) => {
     if ($role) {
       set(await rpcGetSecrets().send($keyPair));
+    } else {
+      set();
     }
   }
 );
