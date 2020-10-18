@@ -1,13 +1,15 @@
-import { join } from "../auth";
+import { getRole, join } from "../auth";
 import { IContext } from "../context";
 import { PsstError } from "../errors";
 import { hexStringToUint8Array } from "../f";
+import { getSecrets } from "../secrets";
 import { IRPCContext } from "./jsonrpc";
 
 function callbackify(f: any) {
   return (args: any, context: IRPCContext, callback: any) => {
     try {
-      callback(null, f(context.user, ...args));
+      const r = f(context.user, ...args);
+      callback(null, r);
     } catch (error) {
       if (error instanceof PsstError) {
         callback({
@@ -24,15 +26,21 @@ function callbackify(f: any) {
 export default function rpc(context: IContext) {
   const { db } = context;
 
-  function rpcJoin(publicKey: string, invite: string) {
-    join(db, hexStringToUint8Array(publicKey), hexStringToUint8Array(invite));
+  function rpcJoin(user: string, invite: string) {
+    return join(db, hexStringToUint8Array(user), hexStringToUint8Array(invite));
   }
 
-  function rpcReadSecrets(publicKey: string) {
-    //join(db, hexStringToUint8Array(publicKey), hexStringToUint8Array(invite));
+  function rpcGetRole(user: string) {
+    return getRole(db, hexStringToUint8Array(user));
+  }
+
+  function rpcGetSecrets(user: string) {
+    return getSecrets(db, hexStringToUint8Array(user));
   }
 
   return {
     join: callbackify(rpcJoin),
+    getRole: callbackify(rpcGetRole),
+    getSecrets: callbackify(rpcGetSecrets),
   };
 }

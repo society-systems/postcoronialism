@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Server } from "jayson";
 import { verify } from "../auth";
-import { hexStringToUint8Array } from "../f";
+import { hexStringToUint8Array, uint8ArrayToHexString } from "../f";
+import { getSecrets } from "../secrets";
 
 export interface IRPCContext {
   user?: Uint8Array;
@@ -13,8 +14,17 @@ export function jsonrpc(server: Server) {
       user: res.locals.user,
     };
 
+    console.log(
+      "[RPC]",
+      uint8ArrayToHexString(res.locals.user) + ":",
+      `${req.body.method}(${req.body.params})`
+    );
+
     server.call(req.body, rpcContext, (err: any, result: any) => {
-      if (err) return next(err);
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
       res.send(result || {});
     });
   };
