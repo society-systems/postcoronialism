@@ -3,13 +3,15 @@
   import Pad from "./Pad.svelte";
   import Invite from "./Invite.svelte";
 
-  import { mnemonic, keyPair, publicKey, role, secrets } from "../../store";
+  import { publicKey, role, secrets, setMnemonic } from "../../store";
 
   let name = "🤪🏺⛱🗿";
-  $: {
-    window.keyPair = $keyPair;
-    window.publicKey = $publicKey;
-    console.log($secrets);
+  let mnemonic;
+
+  let showMnemonicInput = false;
+
+  function handleSubmitMnemonic() {
+    setMnemonic(mnemonic);
   }
 </script>
 
@@ -27,9 +29,20 @@
 <main>
   <h1>postcoronialism v0</h1>
 
-  <p>Welcome back, your usermoji is {name}</p>
-  <p>Your public key is {$publicKey}</p>
-  <p>Your role is {$role}</p>
+  {#if $role}
+    <p>Welcome <strong>{$role}</strong></p>
+    <p><a href="#/logout">Exit space</a></p>
+  {:else}
+    <p>
+      <button on:click={() => (showMnemonicInput = true)}>Enter magic words</button>
+      {#if showMnemonicInput}
+        <form on:submit={handleSubmitMnemonic}>
+          <input bind:value={mnemonic} />
+          <button type="submit">Enter</button>
+        </form>
+      {/if}
+    </p>
+  {/if}
 
   <Invite />
 

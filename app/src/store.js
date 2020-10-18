@@ -25,6 +25,11 @@ export function reloadUser() {
   reload.set(Math.random());
 }
 
+export function logout() {
+  localStorage.removeItem("mnemonic");
+  setMnemonic(getMnemonic());
+}
+
 export async function join(invite) {
   await rpcJoin(invite).send(get(keyPair));
   reloadUser();
@@ -46,13 +51,19 @@ export const publicKey = derived(keyPair, ($keyPair) =>
 
 export const role = derived(keyPair, async ($keyPair, set) => {
   const role = await rpcGetRole().send($keyPair);
-  set(role);
+  if (role === 0) {
+    set("admin");
+  } else if (role === 1) {
+    set("member");
+  } else {
+    set();
+  }
 });
 
 export const secrets = derived(
   [keyPair, role],
   async ([$keyPair, $role], set) => {
-    if ($role !== undefined) {
+    if ($role) {
       set(await rpcGetSecrets().send($keyPair));
     }
   }
