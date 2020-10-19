@@ -1,7 +1,7 @@
 <script>
   import { secrets } from "./store";
 
-  export let name;
+  //export let name;
 </script>
 
 {#if $secrets && $secrets.etherpad}

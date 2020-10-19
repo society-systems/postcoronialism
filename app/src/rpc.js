@@ -1,6 +1,16 @@
 import jaysonBrowserClient from "jayson/lib/client/browser";
 import nacl from "tweetnacl";
 
+function getEndpoint() {
+  const { protocol, hostname } = window.location;
+  if (hostname === "localhost") {
+    return `${protocol}//${hostname}:8001`;
+  } else {
+    return `${protocol}//${hostname}/rpc`;
+  }
+}
+const ENDPOINT = getEndpoint();
+
 const callServer = (keyPair) => (request, callback) => {
   let signatureHeaders = {};
   if (keyPair) {
@@ -20,7 +30,7 @@ const callServer = (keyPair) => (request, callback) => {
     },
   };
 
-  fetch(`http://${window.location.hostname}:8001`, options)
+  fetch(ENDPOINT, options)
     .then(function (res) {
       return res.text();
     })
