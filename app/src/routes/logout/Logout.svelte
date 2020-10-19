@@ -16,7 +16,7 @@
 
 <p>Your magic words are:</p>
 
-<p>{$mnemonic}</p>
+<p><code>{$mnemonic}</code></p>
 
 <button on:click={handleLogout}>I saved my magic words and I'm ready to leave
   this space</button>

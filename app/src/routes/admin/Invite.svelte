@@ -4,16 +4,33 @@
 
   let invites = [];
 
-  function generate() {
+  function generate(secretKey, role, n) {
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);
-    const invitation = invite($keyPair.secretKey, USER_ROLE.member, expiry);
-    const hexInvite = uint8ArrayToHexString(invitation);
-    invites = [`${window.location.origin}/#/join/${hexInvite}`];
+
+    invites = [];
+
+    for (let i = 0; i < n; i++) {
+      const invitation = invite(secretKey, role, expiry);
+      const hexInvite = uint8ArrayToHexString(invitation);
+      invites.push(`${window.location.origin}/#/join/${hexInvite}`);
+    }
+  }
+
+  function generateAdmin() {
+    generate($keyPair.secretKey, USER_ROLE.admin, 10);
+  }
+
+  function generateMember() {
+    generate($keyPair.secretKey, USER_ROLE.member, 10);
   }
 </script>
 
-<button on:click={generate}>Generate invite</button>
+<p>
+  Generate invites. An invite is valid for 7 days and can be used only once.
+</p>
+<button on:click={generateAdmin}>Generate invites for admin</button>
+<button on:click={generateMember}>Generate invites for member</button>
 
 <ul>
   {#each invites as i}

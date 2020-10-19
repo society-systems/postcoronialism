@@ -25,7 +25,7 @@
 </style>
 
 <main>
-  <h1 class="centered"><a href="#">postcoronialism v0</a></h1>
+  <h1 class="centered"><a href="#">postcoronialism v0.0.1</a></h1>
 
   <Router {routes} />
 
