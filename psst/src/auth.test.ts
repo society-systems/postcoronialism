@@ -14,6 +14,7 @@ import { init } from "./db";
 import {
   InvalidInviteSignature,
   InvalidSignature,
+  InviteAlreadyUsed,
   InviteExpired,
 } from "./errors";
 import { uint8ArrayToHexString } from "./f";
@@ -64,7 +65,7 @@ describe("User management", () => {
 
     const user2KeyPair = nacl.sign.keyPair();
     expect(() => join(db, user2KeyPair.publicKey, invitation)).toThrow(
-      "UNIQUE constraint failed"
+      InviteAlreadyUsed
     );
   });
 

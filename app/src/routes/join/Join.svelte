@@ -4,14 +4,23 @@
 
   export let params = {};
 
+  let error;
+
   async function handleJoin() {
-    await join(params.invitation);
-    console.log("joining");
-    replace("/");
+    try {
+      await join(params.invitation);
+      console.log("joining");
+      replace("/");
+    } catch (e) {
+      console.log("error", e);
+      error = e.message;
+    }
   }
 </script>
 
-Welcome!
-{params.invitation}
-
+You've been invited to join Postcoronialism.
 <button on:click={handleJoin}>Join</button>
+
+{#if error}
+  <p>{error}</p>
+{/if}

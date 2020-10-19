@@ -11,6 +11,7 @@ import {
   InvalidSignature,
   InviteExpired,
   InvalidInviteSignature,
+  InviteAlreadyUsed,
 } from "./errors";
 
 export enum USER_ROLE {
@@ -94,11 +95,19 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
 
 export function join(db: Database, publicKey: Uint8Array, invite: Uint8Array) {
   const invitation = verifyInvite(db, invite);
-  db.prepare(SQL_USERS_INSERT).run({
-    publicKey: uint8ArrayToHexString(publicKey),
-    role: invitation.role,
-    invite: sha256(invite),
-  });
+  try {
+    db.prepare(SQL_USERS_INSERT).run({
+      publicKey: uint8ArrayToHexString(publicKey),
+      role: invitation.role,
+      invite: sha256(invite),
+    });
+  } catch (e) {
+    if (
+      e.toString() === "SqliteError: UNIQUE constraint failed: users.invite"
+    ) {
+      throw new InviteAlreadyUsed();
+    }
+  }
 }
 
 export function addGenesisAdmin(db: Database, publicKey: Uint8Array) {

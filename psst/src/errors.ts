@@ -31,6 +31,14 @@ export class InvalidInviteSignature extends PsstError {
   }
 }
 
+export class InviteAlreadyUsed extends PsstError {
+  constructor() {
+    super("Invite already used");
+    this.code = -32004;
+    Object.setPrototypeOf(this, InviteAlreadyUsed.prototype);
+  }
+}
+
 export class Unauthorized extends PsstError {
   constructor() {
     super("I'm sorry Dave, I'm afraid I can't do that");

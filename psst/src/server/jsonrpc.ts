@@ -23,7 +23,8 @@ export function jsonrpc(server: Server) {
     server.call(req.body, rpcContext, (err: any, result: any) => {
       if (err) {
         console.log(err);
-        return next(err);
+        return res.send(err);
+        //return next(err);
       }
       res.send(result || {});
     });
