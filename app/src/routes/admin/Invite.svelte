@@ -34,6 +34,6 @@
 
 <ul>
   {#each invites as i}
-    <li>{i}</li>
+    <li><code>{i}</code></li>
   {/each}
 </ul>

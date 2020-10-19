@@ -1,15 +1,13 @@
 import { writable, derived, get } from "svelte/store";
-import { generateMnemonic } from "bip39";
+import { generateMnemonic, validateMnemonic } from "bip39";
 import nacl from "tweetnacl";
 import { Buffer } from "buffer";
 import { rpcGetRole, rpcGetSecrets, rpcJoin } from "./rpc";
 
-window.generateMnemonic = generateMnemonic;
-
 // ACTIONS
 export function getMnemonic() {
   let m = localStorage.getItem("mnemonic");
-  if (!m || m.trim().length === 0) {
+  if (!validateMnemonic(m)) {
     m = generateMnemonic();
     localStorage.setItem("mnemonic", m);
   }
@@ -17,8 +15,17 @@ export function getMnemonic() {
 }
 
 export function setMnemonic(m) {
-  localStorage.setItem("mnemonic", m);
-  mnemonic.set(m);
+  m = m
+    .split(" ")
+    .filter((token) => token.length)
+    .join(" ");
+  if (validateMnemonic(m)) {
+    localStorage.setItem("mnemonic", m);
+    mnemonic.set(m);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export function reloadUser() {

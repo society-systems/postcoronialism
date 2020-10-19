@@ -7,10 +7,14 @@
   let name = "🤪🏺⛱🗿";
   let mnemonic;
 
+  let error;
+
   let showMnemonicInput = false;
 
   function handleSubmitMnemonic() {
-    setMnemonic(mnemonic);
+    if (!setMnemonic(mnemonic)) {
+      error = true;
+    }
   }
 </script>
 
@@ -25,9 +29,15 @@
     <button on:click={() => (showMnemonicInput = true)}>Enter magic words</button>
     {#if showMnemonicInput}
       <form on:submit={handleSubmitMnemonic}>
-        <input bind:value={mnemonic} />
+        <input bind:value={mnemonic} required />
         <button type="submit">Enter</button>
       </form>
+      {#if error}
+        <p>
+          Invalid magic words. Make sure that you entered your 12 words
+          correctly.
+        </p>
+      {/if}
     {/if}
   </p>
 {/if}
