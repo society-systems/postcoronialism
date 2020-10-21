@@ -63,14 +63,30 @@ export function call(method, ...args) {
   };
 }
 
-export function rpcGetRole() {
-  return call("getRole");
+export function rpcJoinSpace(userName, invite) {
+  return call("joinSpace", userName, invite);
 }
 
-export function rpcJoin(invite) {
-  return call("join", invite);
+export function rpcGetSecret() {
+  return call("getSecret");
 }
 
-export function rpcGetSecrets() {
-  return call("getSecrets");
+export function rpcSetSecret(value, nonce) {
+  return call("setSecret", value, nonce);
+}
+
+export function rpcGetSpace() {
+  return call("getSpace");
+}
+
+export function rpcGetInviteDetails(user) {
+  return call("getInviteDetails", user);
+}
+
+export function rpcHasSpace(spaceName) {
+  return call("hasSpace", spaceName);
+}
+
+export function rpcCreateSpace(spaceName, userName) {
+  return call("createSpace", spaceName, userName);
 }

@@ -10,6 +10,10 @@ export function uint8ArrayToHexString(i) {
   return Buffer.from(i).toString("hex");
 }
 
+export function hexStringToUint8Array(s) {
+  return Uint8Array.from(Buffer.from(s, "hex"));
+}
+
 export function uint32toUint8Array(n) {
   if (n < 0 || n >= 2 ** 32) {
     throw new RangeError("Number should be between 0 and 4294967296");
@@ -31,6 +35,7 @@ export function uint8ArrayToUint32(a) {
   // the unsigned shift operator `>>>`.
   return ((a[0] << 24) | (a[1] << 16) | (a[2] << 8) | a[3]) >>> 0;
 }
+
 export function invite(secretKey, role, expiry) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
   const nonce = nacl.randomBytes(32);
@@ -45,4 +50,14 @@ export function invite(secretKey, role, expiry) {
   return Uint8Array.from(
     Buffer.concat([message, signature, publicKey].map(Buffer.from))
   );
+}
+
+export function getSignerFromInvite(invite) {
+  return invite.substr(invite.length - 64);
+}
+
+export function generateDeterministicSeed(mnemonic, path = "") {
+  const textSeed = mnemonic + path;
+  const byteSeed = new TextEncoder().encode(textSeed);
+  return nacl.hash(byteSeed).slice(0, 32);
 }

@@ -49,7 +49,7 @@ describe("JSONRPC", () => {
       id: 1,
     });
     const signature = nacl.sign.detached(Buffer.from(body), keyPair.secretKey);
-    const res = await request(app)
+    await request(app)
       .post("/")
       .send(body)
       .set("content-type", "application/json")
@@ -66,7 +66,7 @@ describe("JSONRPC", () => {
       id: 1,
     });
     const signature = nacl.sign.detached(Buffer.from(body), keyPair.secretKey);
-    const res = await request(app)
+    await request(app)
       .post("/")
       .send(body)
       .set("content-type", "application/json")

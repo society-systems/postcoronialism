@@ -1,25 +1,45 @@
 <script>
-  import { join } from "../../store";
+  import { joinSpace, getInviteDetails } from "../../store";
   import { replace } from "svelte-spa-router";
 
   export let params = {};
 
   let error;
+  let userName = "";
+  let signerName = "";
+  let spaceName = "";
+
+  getInviteDetails(params.invitation).then((d) => {
+    signerName = d.userName;
+    spaceName = d.spaceName;
+  });
 
   async function handleJoin() {
     try {
-      await join(params.invitation);
+      await joinSpace(spaceName, userName, params.invitation);
       console.log("joining");
-      replace("/");
+      replace("/space/" + spaceName);
     } catch (e) {
       console.log("error", e);
-      error = e.message;
+      if (e.code === -32006) {
+        error = "Please choose another name.";
+      } else {
+        error = e.message;
+      }
     }
   }
 </script>
 
-You've been invited to join Postcoronialism.
-<button on:click={handleJoin}>Join</button>
+You've been invited by
+{signerName}
+to join
+{spaceName}.
+
+<form on:submit|preventDefault={handleJoin}>
+  Choose a name to join the space:
+  <input bind:value={userName} />
+  <button>Join "{spaceName}"</button>
+</form>
 
 {#if error}
   <p>{error}</p>

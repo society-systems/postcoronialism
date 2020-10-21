@@ -39,6 +39,22 @@ export class InviteAlreadyUsed extends PsstError {
   }
 }
 
+export class ConstraintError extends PsstError {
+  constructor() {
+    super("Name too long");
+    this.code = -32005;
+    Object.setPrototypeOf(this, ConstraintError.prototype);
+  }
+}
+
+export class DuplicateEntity extends PsstError {
+  constructor() {
+    super("Duplicate entity");
+    this.code = -32006;
+    Object.setPrototypeOf(this, DuplicateEntity.prototype);
+  }
+}
+
 export class Unauthorized extends PsstError {
   constructor() {
     super("I'm sorry Dave, I'm afraid I can't do that");

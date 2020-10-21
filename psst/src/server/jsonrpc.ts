@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import { Server } from "jayson";
-import { verify } from "../auth";
+import nacl from "tweetnacl";
 import { hexStringToUint8Array, uint8ArrayToHexString } from "../f";
-import { getSecrets } from "../secrets";
 
 export interface IRPCContext {
   user?: Uint8Array;
@@ -16,8 +15,10 @@ export function jsonrpc(server: Server) {
 
     console.log(
       "[RPC]",
-      uint8ArrayToHexString(res.locals.user) + ":",
-      `${req.body.method}(${req.body.params})`
+      (res.locals.user ? uint8ArrayToHexString(res.locals.user) : "null") + ":",
+      `${req.body.method}(${
+        req.body.params !== undefined ? req.body.params : ""
+      })`
     );
 
     server.call(req.body, rpcContext, (err: any, result: any) => {
@@ -36,7 +37,7 @@ export function verifySignature(req: Request, res: Response, buf: Buffer) {
   const signature = req.get("psst-signature");
   if (publicKey && signature) {
     if (
-      verify(
+      nacl.sign.detached.verify(
         Uint8Array.from(buf),
         hexStringToUint8Array(signature),
         hexStringToUint8Array(publicKey)

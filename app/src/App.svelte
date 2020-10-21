@@ -1,18 +1,21 @@
 <script>
+  import { secret } from "./store";
   import Router from "svelte-spa-router";
 
   import Home from "./routes/home";
-  import Admin from "./routes/admin";
+  import Space from "./routes/space";
   import Join from "./routes/join";
   import Logout from "./routes/logout";
 
-  import Jitsi from "./Jitsi.svelte";
-  import Pad from "./Pad.svelte";
+  $: {
+    console.log($secret);
+  }
 
   const routes = {
     "/": Home,
-    "/admin": Admin,
     "/logout": Logout,
+    "/space/:name": Space,
+    "/space/:name/admin": Space,
     "/join/:invitation": Join,
   };
 </script>
@@ -25,15 +28,9 @@
 </style>
 
 <main>
-  <h1 class="centered"><a href="#">postcoronialism v0.0.1</a></h1>
+  <h1 class="centered">
+    <a href="#/space/postcoronialism">postcoronialism v0.0.2</a>
+  </h1>
 
   <Router {routes} />
-
-  <section>
-    <Jitsi />
-  </section>
-
-  <section>
-    <Pad />
-  </section>
 </main>

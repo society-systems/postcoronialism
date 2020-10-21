@@ -1,57 +1,60 @@
 import { Database } from "better-sqlite3";
-import { getRole, hasRole, USER_ROLE } from "./auth";
-import { Unauthorized } from "./errors";
+import nacl from "tweetnacl";
+import {
+  ConstraintError,
+  DuplicateEntity,
+  InvalidInviteSignature as InvalidSigner,
+  InvalidSignature,
+  InviteExpired,
+} from "./errors";
+import { sha256, uint32toUint8Array, uint8ArrayToUint32 } from "./f";
+import { getUser, sqlInsertUser } from "./users";
 
-const SQL_SECRETS_CREATE = `
-CREATE TABLE IF NOT EXISTS secrets(
-  key STRING NOT NULL,
-  value STRING NOT NULL,
-  UNIQUE(key)
-)`;
+const SQL_CREATE_TABLE = `
+CREATE TABLE IF NOT EXISTS secrets (
+  publicKey STRING PRIMARY KEY,
+  value BLOB NOT NULL,
+  nonce BLOB NOT NULL
+)
+`;
 
 const SQL_SECRETS_GET = `
-SELECT *
+SELECT value, nonce
 FROM secrets
+WHERE (publicKey = $publicKey)
 `;
 
-const SQL_SECRETS_SET = `
-INSERT OR REPLACE INTO secrets (key, value)
-VALUES ($key, $value)
+const SQL_SECRETS_INSERT = `
+INSERT OR REPLACE INTO secrets (publicKey, value, nonce)
+VALUES ($publicKey, $value, $nonce)
 `;
 
-export function create(db: Database) {
-  db.prepare(SQL_SECRETS_CREATE).run();
+export function sqlCreateTableSecrets(db: Database) {
+  return db.prepare(SQL_CREATE_TABLE).run();
 }
 
-export function getSecrets(db: Database, user: Uint8Array) {
-  const role = getRole(db, user);
-  if (role === USER_ROLE.ADMIN || role === USER_ROLE.MEMBER) {
-    return db
-      .prepare(SQL_SECRETS_GET)
-      .all()
-      .reduce(
-        (acc: any, curr: { key: string; value: string }) =>
-          (acc[curr.key] = curr.value) && acc,
-        {}
-      );
-  } else {
-    throw new Unauthorized();
-  }
+export function sqlInsertSecret(
+  db: Database,
+  publicKey: Uint8Array,
+  value: Uint8Array,
+  nonce: Uint8Array
+) {
+  return db.prepare(SQL_SECRETS_INSERT).run({ publicKey, value, nonce });
+}
+
+export function sqlGetSecret(db: Database, publicKey: Uint8Array) {
+  return db.prepare(SQL_SECRETS_GET).get({ publicKey });
+}
+
+export function getSecret(db: Database, user: Uint8Array) {
+  return sqlGetSecret(db, user);
 }
 
 export function setSecret(
   db: Database,
   user: Uint8Array,
-  key: string,
-  value: string
+  value: Uint8Array,
+  nonce: Uint8Array
 ) {
-  const role = getRole(db, user);
-  if (role === USER_ROLE.ADMIN) {
-    return db.prepare(SQL_SECRETS_SET).run({
-      key,
-      value,
-    });
-  } else {
-    throw new Unauthorized();
-  }
+  return sqlInsertSecret(db, user, value, nonce);
 }

@@ -2,7 +2,7 @@
   import Jitsi from "../../Jitsi.svelte";
   import Pad from "../../Pad.svelte";
 
-  import { publicKey, role, secrets, setMnemonic } from "../../store";
+  import { publicKey, space, setMnemonic } from "../../store";
 
   let name = "🤪🏺⛱🗿";
   let mnemonic;
@@ -18,9 +18,9 @@
   }
 </script>
 
-{#if $role}
-  <p>Welcome <strong>{$role}</strong></p>
-  {#if $role === 'admin'}
+{#if $space}
+  <p>Welcome <strong>{$space.name}</strong></p>
+  {#if $space.isAdmin === 'admin'}
     <p><a href="#/admin">Create invites</a></p>
   {/if}
   <p><a href="#/logout">Exit space</a></p>
