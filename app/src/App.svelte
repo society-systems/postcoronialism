@@ -27,10 +27,4 @@
   }
 </style>
 
-<main>
-  <h1 class="centered">
-    <a href="#/space/postcoronialism">postcoronialism v0.0.2</a>
-  </h1>
-
-  <Router {routes} />
-</main>
+<Router {routes} />

@@ -9,7 +9,7 @@ program.name("psst");
 program.version("0.0.1");
 
 program
-  .command("daemon")
+  .command("daemon", { isDefault: true })
   .description("run the psst daemon")
   .action(() => {
     const context = getContext();

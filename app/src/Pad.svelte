@@ -1,13 +1,13 @@
 <script>
-  import { space } from "./store";
-
-  //export let name;
+  export let key;
+  export let name;
+  $: {
+    console.log("key is", key);
+  }
 </script>
 
-{#if $space && $space.etherpad}
-  <iframe
-    title="Collaborative pad"
-    src="https://pad.riseup.net/p/{$space.etherpad}?userName=postcoronialism"
-    width="100%"
-    height="400" />
-{/if}
+<iframe
+  title="Collaborative pad"
+  src="https://pad.riseup.net/p/{key}?userName={name}"
+  width="100%"
+  height="400" />

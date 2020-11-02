@@ -1,73 +1,70 @@
-html,
-body {
-  position: relative;
-  width: 100%;
-  height: 100%;
+:root {
+  --size-xxs: 0.0625rem;
+  --size-xs: 0.125rem;
+  --size-s: 0.5rem;
+  --size-m: 1rem;
+  --size-l: 2rem;
+  --size-xl: 3rem;
+
+  --color-primary: #8871ff;
+  --color-secondary: #e1fe6e;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+  height: 100vh;
 }
 
 body {
-  color: #333;
   margin: 0;
-  padding: 8px;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  padding: 0;
+  min-height: 100vh;
+}
+
+button,
+.button {
+  border: 0;
+  cursor: pointer;
+  padding: var(--size-s) var(--size-m);
+  font-family: monospace;
+  font-size: var(--size-m);
+  text-decoration: none;
+  color: var(--color-primary);
+  background-color: var(--color-secondary);
+  display: inline-block;
+  text-align: center;
+}
+
+input {
+  color: white;
+  background-color: #ffffff33;
+  font-family: monospace;
+  border: none;
+  border-bottom: var(--size-xs) solid var(--color-secondary);
+  padding: var(--size-s) var(--size-m);
+  margin-bottom: var(--size-m);
+}
+
+button:focus,
+.button:focus,
+input:focus {
+  outline: var(--size-xs) solid var(--color-secondary);
 }
 
 main {
+  background-color: var(--color-primary);
+  min-height: 100vh;
+  padding: var(--size-m);
+}
+
+section {
   max-width: 1024px;
   margin: 0 auto;
-}
-
-a {
-  color: rgb(0, 100, 200);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-a:visited {
-  color: rgb(0, 80, 160);
-}
-
-label {
-  display: block;
-}
-
-input,
-button,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
-  -webkit-padding: 0.4em 0;
-  padding: 0.4em;
-  margin: 0 0 0.5em 0;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-}
-
-input:disabled {
-  color: #ccc;
-}
-
-button {
-  color: #333;
-  background-color: #f4f4f4;
-  outline: none;
-}
-
-button:disabled {
-  color: #999;
-}
-
-button:not(:disabled):active {
-  background-color: #ddd;
-}
-
-button:focus {
-  border-color: #666;
 }

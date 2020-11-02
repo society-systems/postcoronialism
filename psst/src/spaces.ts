@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS spaces (
   name STRING NOT NULL PRIMARY KEY,
   jitsiKey STRING NOT NULL,
   etherpadKey STRING NOT NULL,
+  isPublic BOOL NOT NULL, 
 
   UNIQUE (name COLLATE NOCASE),
   CHECK (length(name) <= 64) 
@@ -28,8 +29,8 @@ WHERE name = $name
 `;
 
 const SQL_SPACES_CREATE = `
-INSERT INTO spaces (name, jitsiKey, etherpadKey)
-VALUES ($name, $jitsiKey, $etherpadKey)
+INSERT INTO spaces (name, jitsiKey, etherpadKey, isPublic)
+VALUES ($name, $jitsiKey, $etherpadKey, isPublic)
 `;
 
 export function sqlCreateTableSpaces(db: Database) {
@@ -40,7 +41,8 @@ export function sqlInsertSpace(
   db: Database,
   name: string,
   jitsiKey: string,
-  etherpadKey: string
+  etherpadKey: string,
+  isPublic: boolean = false
 ) {
   try {
     if (/[\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]/.test(name)) {
@@ -48,6 +50,7 @@ export function sqlInsertSpace(
     }
     db.prepare(SQL_SPACES_CREATE).run({
       name,
+      isPublic,
       jitsiKey,
       etherpadKey,
     });
@@ -95,8 +98,8 @@ export function createSpace(
     sqlInsertSpace(
       db,
       spaceName,
-      sha256(nacl.randomBytes(32)),
-      sha256(nacl.randomBytes(32))
+      sha256(nacl.randomBytes(32)) + "-keep",
+      sha256(nacl.randomBytes(32)).substr(0, 32)
     );
     sqlInsertUser(db, user, spaceName, name, true, user);
   });
