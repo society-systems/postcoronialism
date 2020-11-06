@@ -1,11 +1,27 @@
-<style>
-  div {
-    width: 60%;
-  }
+<script>
+  import { onMount } from "svelte";
+  import WaveSurfer from "wavesurfer";
 
+  let waveform;
+
+  onMount(() => {
+    let wavesurfer = WaveSurfer.create({
+      container: waveform,
+    });
+    wavesurfer.load(
+      "http://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3"
+    );
+    wavesurfer.on("ready", function () {
+      wavesurfer.play();
+    });
+  });
+</script>
+
+<style>
   h1,
   p {
     color: white;
+    width: 60%;
   }
 
   h1 {
@@ -29,4 +45,6 @@
     demilitarisation of the health education and labor sectors and the
     ecological, systematic and agnotological comorbitity of Capital.
   </p>
+
+  <div id="waveform" bind:this={waveform} />
 </div>

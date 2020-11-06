@@ -9,6 +9,7 @@ function getEndpoint() {
     return `${protocol}//${hostname}/rpc`;
   }
 }
+
 const ENDPOINT = getEndpoint();
 
 const callServer = (keyPair) => (request, callback) => {

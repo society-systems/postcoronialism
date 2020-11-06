@@ -12,7 +12,14 @@
 </script>
 
 <style>
+  header {
+    position: relative;
+    height: 5rem;
+  }
+
   .group {
+    position: absolute;
+    right: 0;
     width: 16rem;
     margin: 0 0 0 auto;
   }
@@ -31,9 +38,9 @@
       {#if showMagicWords}
         <Mnemonic />
       {/if}
-      <button on:click={handleShowMagicWords}>Enter magic words</button>
+      <button on:click={handleShowMagicWords}>Enter Magic Words</button>
       <hr />
-      <a class="button" href="mailto:admin@example.org">Make contact</a>
+      <a class="button" href="mailto:admin@example.org">Make Contact</a>
     {:else if space.claimed === false}
       <button>Claim this space</button>
     {:else}
