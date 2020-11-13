@@ -18,7 +18,7 @@
     try {
       await joinSpace(spaceName, userName, params.invitation);
       console.log("joining");
-      replace("/space/" + spaceName);
+      replace("/");
     } catch (e) {
       console.log("error", e);
       if (e.code === -32006) {
@@ -30,17 +30,21 @@
   }
 </script>
 
-You've been invited by
-{signerName}
-to join
-{spaceName}.
+<main>
+  <section>
+    You've been invited by
+    {signerName}
+    to join
+    {spaceName}.
 
-<form on:submit|preventDefault={handleJoin}>
-  Choose a name to join the space:
-  <input bind:value={userName} />
-  <button>Join "{spaceName}"</button>
-</form>
+    <form on:submit|preventDefault={handleJoin}>
+      Choose a name to join the space:
+      <input bind:value={userName} />
+      <button>Join "{spaceName}"</button>
+    </form>
 
-{#if error}
-  <p>{error}</p>
-{/if}
+    {#if error}
+      <p>{error}</p>
+    {/if}
+  </section>
+</main>

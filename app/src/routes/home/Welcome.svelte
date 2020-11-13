@@ -32,12 +32,16 @@
   p {
     font-size: 1.5rem;
   }
+
+  .divider {
+    font-size: var(--size-s);
+  }
 </style>
 
 <div>
   <h1><strong>post</strong>coronialism</h1>
 
-  <hr />
+  <p class="divider">♡ ♥ ♠ ♣ © ☞ 〠♬♩ ♫ ☆ ☎ ■♪$☆●＋＊，＋◇◆</p>
 
   <p>
     is an open collective, study, solidarity and strategy group that commonly

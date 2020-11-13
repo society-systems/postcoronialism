@@ -1,11 +1,6 @@
 import nacl from "tweetnacl";
 import { Buffer } from "buffer";
 
-export const USER_ROLE = {
-  admin: 0,
-  member: 1,
-};
-
 export function uint8ArrayToHexString(i) {
   return Buffer.from(i).toString("hex");
 }
@@ -36,10 +31,10 @@ export function uint8ArrayToUint32(a) {
   return ((a[0] << 24) | (a[1] << 16) | (a[2] << 8) | a[3]) >>> 0;
 }
 
-export function invite(secretKey, role, expiry) {
+export function invite(secretKey, isAdmin, expiry) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
   const nonce = nacl.randomBytes(32);
-  const roleByte = Uint8Array.from([role]);
+  const roleByte = Uint8Array.from([isAdmin ? 1 : 0]);
   const expiryBytes = uint32toUint8Array(Math.floor(expiry.getTime() / 1000));
   // For whatever reason the buffer shim doesn't recognize
   // native Uint8Array as a Buffer, so we call Buffer again

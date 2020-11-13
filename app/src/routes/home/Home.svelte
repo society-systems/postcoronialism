@@ -1,43 +1,32 @@
 <script>
-  import Jitsi from "../../Jitsi.svelte";
-  import Pad from "../../Pad.svelte";
+  import Header from "./Header.svelte";
+  import Admin from "./Admin.svelte";
+  import { location } from "svelte-spa-router";
+  import { spaceName, space } from "../../store";
+  import Welcome from "./Welcome.svelte";
+  import Jitsi from "../../components/Jitsi.svelte";
+  import Pad from "../../components/Pad.svelte";
 
-  import { publicKey, space, setMnemonic } from "../../store";
-
-  let name = "🤪🏺⛱🗿";
-  let mnemonic;
-
-  let error;
-
-  let showMnemonicInput = false;
-
-  function handleSubmitMnemonic() {
-    if (!setMnemonic(mnemonic)) {
-      error = true;
-    }
-  }
+  $: isAdmin = $location.endsWith("admin");
 </script>
 
-{#if $space}
-  <p>Welcome <strong>{$space.name}</strong></p>
-  {#if $space.isAdmin === 'admin'}
-    <p><a href="#/admin">Create invites</a></p>
-  {/if}
-  <p><a href="#/logout">Exit space</a></p>
-{:else}
-  <p>
-    <button on:click={() => (showMnemonicInput = true)}>Enter magic words</button>
-    {#if showMnemonicInput}
-      <form on:submit={handleSubmitMnemonic}>
-        <input bind:value={mnemonic} required />
-        <button type="submit">Enter</button>
-      </form>
-      {#if error}
-        <p>
-          Invalid magic words. Make sure that you entered your 12 words
-          correctly.
-        </p>
+<main>
+  <section>
+    {#if $space !== undefined}
+      <Header space={$space} />
+      {#if $space === false}
+        <Welcome />
+      {:else}
+        {#if isAdmin}
+          <Admin />
+        {/if}
+        <!--section>
+          <Jitsi name={$space.name} key={$space.jitsiKey} />
+        </section>
+        <section>
+          <Pad name={$space.name} key={$space.etherpadKey} />
+        </section-->
       {/if}
     {/if}
-  </p>
-{/if}
+  </section>
+</main>

@@ -111,24 +111,22 @@ export async function updateSecret(json) {
   await setSecret({ ...current, ...json });
 }
 
-window.setSecret = setSecret;
-window.getSecret = getSecret;
-window.updateSecret = updateSecret;
-
 // STORES
 export const mnemonic = writable(getMnemonic());
 const reload = writable();
 
 export const secret = readable({}, async (set) => set(await getSecret()));
 
-export const spaceName = derived(location, ($location) => {
-  const match = /^\/space\/([^\/]+)/.exec($location);
-  if (match) {
-    return decodeURIComponent(match[1]);
-  } else {
-    return null;
-  }
-});
+export const spaceName = readable("postcoronialism");
+
+//export const spaceName = derived(location, ($location) => {
+//  const match = /^\/space\/([^\/]+)/.exec($location);
+//  if (match) {
+//    return decodeURIComponent(match[1]);
+//  } else {
+//    return null;
+//  }
+//});
 
 export const keyPair = derived(
   [mnemonic, spaceName, reload],
@@ -153,21 +151,15 @@ export const space = derived(
     } else {
       let record = await rpcGetSpace().send($keyPair);
       if (record === undefined) {
-        record = {
-          claimed: await rpcHasSpace($spaceName).send($keyPair),
-        };
+        const hasSpace = await rpcHasSpace($spaceName).send($keyPair);
+        if (!hasSpace) {
+          await createSpace($spaceName, "admin");
+        } else {
+          set(false);
+        }
       } else {
-        // If the record is defined, then we are part of this space.
-        // In that case we check if the space is listed in our secrets.
-        const secret = await getSecret();
-        if (!secret.spaces) {
-          secret.spaces = {};
-        }
-        if (!secret.spaces[$spaceName]) {
-          await updateSecret({ spaces: { [$spaceName]: 1, ...secret.spaces } });
-        }
+        set(record);
       }
-      set(record);
     }
   }
 );
