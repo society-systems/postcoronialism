@@ -70,7 +70,7 @@ describe("SQL constraints for Spaces", () => {
   });
 
   test("Create a post", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     const postTs = setPostTs(postId, -10);
     const replyId = addPost(
       db,
@@ -88,8 +88,7 @@ describe("SQL constraints for Spaces", () => {
       "reply body 2"
     );
     const replyTs2 = setPostTs(replyId2, -8);
-    const posts = getPosts(db, finn.publicKey, null, 10, 0);
-    console.log(posts);
+    const posts = getPosts(db, finn.publicKey, "", 10, 0);
     expect(posts).toEqual([
       {
         id: postId,
@@ -97,11 +96,11 @@ describe("SQL constraints for Spaces", () => {
         body: "body",
         publicKey: uint8ArrayToHexString(finn.publicKey),
         name: "Finn",
-        lastReplyTs: replyTs2,
+        lastTs: replyTs2,
         ts: postTs,
         seen: null,
         seenTs: null,
-        replyTo: null,
+        parentId: "",
       },
     ]);
     const replies = getPosts(db, finn.publicKey, postId, 10, 0);
@@ -113,9 +112,10 @@ describe("SQL constraints for Spaces", () => {
         publicKey: uint8ArrayToHexString(jake.publicKey),
         name: "Jake",
         ts: replyTs,
+        lastTs: replyTs,
         seen: null,
         seenTs: null,
-        replyTo: postId,
+        parentId: postId,
       },
       {
         id: replyId2,
@@ -124,19 +124,20 @@ describe("SQL constraints for Spaces", () => {
         publicKey: uint8ArrayToHexString(finn.publicKey),
         name: "Finn",
         ts: replyTs2,
+        lastTs: replyTs2,
         seen: null,
         seenTs: null,
-        replyTo: postId,
+        parentId: postId,
       },
     ]);
-    expect(() => getPosts(db, iceKing.publicKey, null, 10, 0)).toThrow(
+    expect(() => getPosts(db, iceKing.publicKey, "", 10, 0)).toThrow(
       Unauthorized
     );
     expect(() => getPost(db, iceKing.publicKey, postId)).toThrow(Unauthorized);
   });
 
   test("Edit a post", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     const post = getPost(db, finn.publicKey, postId);
     expect(post).toMatchObject({
       id: postId,
@@ -145,7 +146,7 @@ describe("SQL constraints for Spaces", () => {
       publicKey: uint8ArrayToHexString(finn.publicKey),
       name: "Finn",
       seenTs: null,
-      replyTo: null,
+      parentId: "",
     });
     const editedPost = editPost(db, finn.publicKey, postId, "title2", "body2");
     expect(editedPost).toMatchObject({
@@ -155,7 +156,7 @@ describe("SQL constraints for Spaces", () => {
       publicKey: uint8ArrayToHexString(finn.publicKey),
       name: "Finn",
       seenTs: null,
-      replyTo: null,
+      parentId: "",
     });
     editPost(db, finn.publicKey, postId, "title3", "body3");
     const editedPost2 = getPost(db, finn.publicKey, postId);
@@ -166,11 +167,11 @@ describe("SQL constraints for Spaces", () => {
       publicKey: uint8ArrayToHexString(finn.publicKey),
       name: "Finn",
       seenTs: null,
-      replyTo: null,
+      parentId: "",
     });
   });
   test("Another user cannot edit a post", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     expect(() =>
       editPost(db, jake.publicKey, postId, "jake title", "jake body")
     ).toThrow(Unauthorized);
@@ -179,7 +180,7 @@ describe("SQL constraints for Spaces", () => {
     ).toThrow(Unauthorized);
   });
   test("Mark a post as seen/unseen", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     let post = getPost(db, finn.publicKey, postId);
     expect(post.seenTs).toBeNull();
     markPostAsSeen(db, finn.publicKey, postId);
@@ -190,7 +191,7 @@ describe("SQL constraints for Spaces", () => {
     expect(post.seenTs).toBeNull();
   });
   test("Retrieve posts in the correct order", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     const postTs = setPostTs(postId, -100);
     const replyId = addPost(
       db,
@@ -208,10 +209,10 @@ describe("SQL constraints for Spaces", () => {
       "reply body 2"
     );
     const replyTs2 = setPostTs(replyId2, -80);
-    const postId2 = addPost(db, jake.publicKey, null, "jake", "teh dog");
+    const postId2 = addPost(db, jake.publicKey, "", "jake", "teh dog");
     const postTs2 = setPostTs(postId2, -50);
     markPostAsSeen(db, finn.publicKey, postId);
-    let posts = getPosts(db, finn.publicKey, null, 10, 0);
+    let posts = getPosts(db, finn.publicKey, "", 10, 0);
     expect(posts.map(({ id }) => id)).toEqual([postId2, postId]);
     const replyId3 = addPost(
       db,
@@ -221,7 +222,7 @@ describe("SQL constraints for Spaces", () => {
       "reply body 3"
     );
     const replyTs3 = setPostTs(replyId3, -40);
-    posts = getPosts(db, finn.publicKey, null, 10, 0);
+    posts = getPosts(db, finn.publicKey, "", 10, 0);
     expect(posts.map(({ id }) => id)).toEqual([postId, postId2]);
     let replies = getPosts(db, finn.publicKey, postId, 10, 0);
     expect(replies.map(({ id }) => id)).toEqual([replyId, replyId2, replyId3]);
@@ -254,7 +255,7 @@ describe("SQL constraints for Spaces", () => {
         publicKey: uint8ArrayToHexString(jake.publicKey),
         name: "Jake",
         seenTs: null,
-        replyTo: postId,
+        parentId: postId,
       },
       {
         id: replyId2,
@@ -263,13 +264,13 @@ describe("SQL constraints for Spaces", () => {
         publicKey: uint8ArrayToHexString(finn.publicKey),
         name: "Finn",
         seenTs: null,
-        replyTo: postId,
+        parentId: postId,
       },
     ]);
   });
 */
   test("Delete on cascade cleans up everything", () => {
-    const postId = addPost(db, finn.publicKey, null, "title", "body");
+    const postId = addPost(db, finn.publicKey, "", "title", "body");
     const replyId = addPost(
       db,
       jake.publicKey,

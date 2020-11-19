@@ -4,47 +4,27 @@ import { db } from "./db";
 import { Unauthorized } from "./errors";
 import { sha256, uint8ArrayToHexString } from "./f";
 import { getUser } from "./users";
+import fs from "fs";
+import path from "path";
 
-const SQL_CREATE_TABLE_POSTS = `
-CREATE TABLE IF NOT EXISTS posts (
-    id STRING PRIMARY KEY,
-    publicKey STRING NOT NULL,
-    replyTo STRING,
-    spaceName STRING NOT NULL,
-    title STRING,
-    body STRING NOT NULL,
-    ts DATETIME DEFAULT (strftime('%s','now')),
-
-    FOREIGN KEY (publicKey) REFERENCES users (publicKey) ON DELETE CASCADE,
-    FOREIGN KEY (spaceName) REFERENCES spaces (name) ON DELETE CASCADE
-)
-`;
-
-const SQL_CREATE_TABLE_SEEN = `
-CREATE TABLE IF NOT EXISTS seen (
-    publicKey STRING NOT NULL,
-    postId STRING NOT NULL,
-    ts DATETIME DEFAULT (strftime('%s','now')),
-
-    UNIQUE (publicKey, postId),
-    FOREIGN KEY (publicKey) REFERENCES users (publicKey) ON DELETE CASCADE,
-    FOREIGN KEY (postId) REFERENCES posts (id) ON DELETE CASCADE
-)
-`;
+const SQL_STATEMENTS = fs.readFileSync(
+  path.resolve(__dirname, "forum.sql"),
+  "utf-8"
+);
 
 const SQL_SEEN_INSERT = `
-INSERT INTO seen (publicKey, postId)
-VALUES ($publicKey, $postId)
+INSERT INTO seen (publicKey, threadId)
+VALUES ($publicKey, $threadId)
 `;
 
 const SQL_SEEN_DELETE = `
 DELETE FROM seen
-WHERE postId = $postId AND publicKey = $publicKey
+WHERE threadId = $threadId AND publicKey = $publicKey
 `;
 
 const SQL_POSTS_INSERT = `
-INSERT INTO posts (id, publicKey, replyTo, spaceName, title, body)
-VALUES ($id, $publicKey, $replyTo, $spaceName, $title, $body)
+INSERT INTO posts (id, publicKey, parentId, spaceName, title, body)
+VALUES ($id, $publicKey, $parentId, $spaceName, $title, $body)
 `;
 
 const SQL_POSTS_UPDATE = `
@@ -68,7 +48,7 @@ WHERE id = $id AND publicKey = $publicKey
 const SQL_POSTS_GET = `
 SELECT
     posts.id,
-    posts.replyTo,
+    posts.parentId,
     posts.title,
     posts.body,
     posts.ts,
@@ -82,7 +62,7 @@ FROM
         ON posts.spaceName = users.spaceName
             AND posts.publicKey = users.publicKey
     LEFT OUTER JOIN seen
-        ON posts.id = seen.postId
+        ON posts.id = seen.threadId
             AND seen.publicKey = $publicKey
 
 WHERE
@@ -92,7 +72,7 @@ WHERE
 const SQL_POSTS_SELECT = `
 SELECT
     posts.id,
-    posts.replyTo,
+    posts.parentId,
     posts.title,
     posts.body,
     posts.ts,
@@ -108,19 +88,20 @@ FROM
         ON posts.spaceName = users.spaceName
             AND posts.publicKey = users.publicKey
     LEFT OUTER JOIN posts AS replies
-        on posts.id = replies.replyTo
+        on posts.id = replies.parentId
     LEFT OUTER JOIN seen
-        ON posts.id = seen.postId
+        ON posts.id = seen.threadId
             AND seen.publicKey = $publicKey
 
 WHERE
     posts.spaceName = $spaceName
-    AND posts.replyTo IS NULL
+    AND posts.parentId = $parentId
 
 GROUP BY
     posts.id
 
 ORDER BY
+    CASE WHEN LENGTH($parentId) THEN lastTs ELSE 0 END,
     lastTs DESC
 
 LIMIT
@@ -130,44 +111,8 @@ OFFSET
     $offset
 `;
 
-const SQL_POSTS_SELECT_REPLY = `
-SELECT
-    posts.id,
-    posts.replyTo,
-    posts.title,
-    posts.body,
-    posts.ts,
-    users.name,
-    users.publicKey,
-    seen.ts AS seenTs,
-    seen.ts >= posts.ts AS seen
-
-FROM
-    posts
-    INNER JOIN users
-        ON posts.spaceName = users.spaceName
-            AND posts.publicKey = users.publicKey
-    LEFT OUTER JOIN seen
-        ON posts.id = seen.postId
-            AND seen.publicKey = $publicKey
-
-WHERE
-    posts.spaceName = $spaceName
-    AND replyTo = $replyTo
-
-ORDER BY
-    posts.ts ASC
-
-LIMIT
-    $limit
-
-OFFSET
-    $offset
-`;
-
 export function sqlCreateTablePosts(db: Database) {
-  db.prepare(SQL_CREATE_TABLE_POSTS).run();
-  db.prepare(SQL_CREATE_TABLE_SEEN).run();
+  db.exec(SQL_STATEMENTS);
 }
 
 export function sqlCreatePost(
@@ -175,14 +120,14 @@ export function sqlCreatePost(
   id: string,
   publicKey: Uint8Array,
   spaceName: string,
-  replyTo: string | null,
+  parentId: string,
   title: string,
   body: string
 ) {
   const result = db.prepare(SQL_POSTS_INSERT).run({
     id,
     publicKey: uint8ArrayToHexString(publicKey),
-    replyTo,
+    parentId,
     spaceName,
     title,
     body,
@@ -224,15 +169,14 @@ export function sqlGetPosts(
   db: Database,
   publicKey: Uint8Array,
   spaceName: string,
-  replyTo: string | null,
+  parentId: string,
   limit: number,
   offset: number
 ) {
-  const query = replyTo === null ? SQL_POSTS_SELECT : SQL_POSTS_SELECT_REPLY;
-  return db.prepare(query).all({
+  return db.prepare(SQL_POSTS_SELECT).all({
     publicKey: uint8ArrayToHexString(publicKey),
     spaceName,
-    replyTo,
+    parentId,
     limit,
     offset,
   });
@@ -241,12 +185,12 @@ export function sqlGetPosts(
 export function sqlSeenInsert(
   db: Database,
   publicKey: Uint8Array,
-  postId: string
+  threadId: string
 ) {
   try {
     return db.prepare(SQL_SEEN_INSERT).run({
       publicKey: uint8ArrayToHexString(publicKey),
-      postId,
+      threadId,
     });
   } catch (e) {
     if (e.toString() === "SqliteError: FOREIGN KEY constraint failed") {
@@ -258,18 +202,18 @@ export function sqlSeenInsert(
 export function sqlSeenDelete(
   db: Database,
   publicKey: Uint8Array,
-  postId: string
+  threadId: string
 ) {
   return db.prepare(SQL_SEEN_DELETE).run({
     publicKey: uint8ArrayToHexString(publicKey),
-    postId,
+    threadId,
   });
 }
 
 export function addPost(
   db: Database,
   user: Uint8Array,
-  replyTo: string | null,
+  parentId: string,
   title: string,
   body: string
 ) {
@@ -278,7 +222,7 @@ export function addPost(
   if (!userData) {
     throw new Unauthorized();
   }
-  sqlCreatePost(db, id, user, userData.spaceName, replyTo, title, body);
+  sqlCreatePost(db, id, user, userData.spaceName, parentId, title, body);
   return id;
 }
 
@@ -326,7 +270,7 @@ export function markPostAsUnseen(db: Database, user: Uint8Array, id: string) {
 export function getPosts(
   db: Database,
   user: Uint8Array,
-  replyTo: string | null,
+  parentId: string,
   limit: number,
   offset: number
 ) {
@@ -334,5 +278,5 @@ export function getPosts(
   if (!userData) {
     throw new Unauthorized();
   }
-  return sqlGetPosts(db, user, userData.spaceName, replyTo, limit, offset);
+  return sqlGetPosts(db, user, userData.spaceName, parentId, limit, offset);
 }
