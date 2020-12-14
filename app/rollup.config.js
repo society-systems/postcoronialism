@@ -6,6 +6,7 @@ import { terser } from "rollup-plugin-terser";
 import globals from "rollup-plugin-node-globals";
 import builtins from "rollup-plugin-node-builtins";
 import json from "@rollup/plugin-json";
+import css from "rollup-plugin-css-only";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -43,15 +44,18 @@ export default {
     file: "public/build/bundle.js",
   },
   plugins: [
+    commonjs(),
+    builtins(),
+    globals(),
     svelte({
-      // enable run-time checks when not in production
-      dev: !production,
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      css: (css) => {
-        css.write("bundle.css");
+      compilerOptions: {
+        // enable run-time checks when not in production
+        dev: !production,
+        // we'll extract any component CSS out into
+        // a separate file - better for performance
       },
     }),
+    css({ output: "bundle.css" }),
 
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
@@ -63,9 +67,6 @@ export default {
       dedupe: ["svelte"],
     }),
     json(),
-    commonjs(),
-    builtins(),
-    globals(),
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated
