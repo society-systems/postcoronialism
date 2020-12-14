@@ -29,6 +29,7 @@ html {
   box-sizing: border-box;
   font-size: 16px;
   height: 100vh;
+  color: white;
 }
 
 body {
@@ -60,7 +61,6 @@ input {
   border: none;
   border-bottom: var(--size-xs) solid var(--color-secondary);
   padding: var(--size-s) var(--size-m);
-  margin-bottom: var(--size-m);
 }
 
 button:focus,
@@ -68,6 +68,12 @@ button:focus,
 input:focus {
   outline: none;
   /*outline: var(--size-xs) solid var(--color-secondary);*/
+}
+
+button,
+.button,
+input {
+  transition: all 0.2s;
 }
 
 main {
@@ -90,6 +96,12 @@ p {
 
 /* Extra Styles */
 
-.neutral {
+.button.neutral,
+button.neutral {
   background-color: var(--color-neutral);
+}
+
+input.neutral,
+.neutral input {
+  border-bottom-color: var(--color-neutral);
 }

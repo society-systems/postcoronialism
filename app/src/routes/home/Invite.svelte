@@ -1,6 +1,7 @@
 <script>
   import { invite, uint8ArrayToHexString } from "../../crypto";
   import { keyPair } from "../../store";
+  import InviteItem from "./InviteItem.svelte";
 
   let invites = [];
 
@@ -26,14 +27,31 @@
   }
 </script>
 
+<style>
+  ul {
+    margin: var(--size-m) 0 0 0;
+    padding: 0;
+  }
+  li {
+    list-style-type: none;
+    display: flex;
+    margin-bottom: var(--size-m);
+  }
+</style>
+
 <p>
   Generate invites. An invite is valid for 7 days and can be used only once.
 </p>
+
 <button on:click={generateAdmin}>Generate invites for admin</button>
 <button on:click={generateMember}>Generate invites for member</button>
 
 <ul>
-  {#each invites as i}
-    <li><code>{i}</code></li>
+  {#each invites as invite}
+    {#key invite}
+      <li>
+        <InviteItem {invite} />
+      </li>
+    {/key}
   {/each}
 </ul>

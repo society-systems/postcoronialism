@@ -2,7 +2,7 @@ import { IContext } from "../context";
 import { PsstError } from "../errors";
 import { hexStringToUint8Array, uint8ArrayToHexString } from "../f";
 import { getSecret, setSecret } from "../secrets";
-import { createSpace, hasSpace, join } from "../spaces";
+import { createSpace, hasSpace, join, verifyInvite } from "../spaces";
 import { getSpaceByUser, getInviteDetails } from "../users";
 import { IRPCContext } from "./jsonrpc";
 
@@ -34,6 +34,10 @@ export default function rpc(context: IContext) {
       name,
       hexStringToUint8Array(invite)
     );
+  }
+
+  function rpcVerifyInvite(_: string, invite: string) {
+    return verifyInvite(db, hexStringToUint8Array(invite));
   }
 
   function rpcGetSpace(user: string) {
@@ -76,6 +80,7 @@ export default function rpc(context: IContext) {
   return {
     joinSpace: callbackify(rpcJoinSpace),
     getSpace: callbackify(rpcGetSpace),
+    verifyInvite: callbackify(rpcVerifyInvite),
     getInviteDetails: callbackify(rpcGetInviteDetails),
     hasSpace: callbackify(rpcHasSpace),
     createSpace: callbackify(rpcCreateSpace),

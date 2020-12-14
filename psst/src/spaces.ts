@@ -5,10 +5,11 @@ import {
   DuplicateEntity,
   InvalidInviteSignature as InvalidSigner,
   InvalidSignature,
+  InviteAlreadyUsed,
   InviteExpired,
 } from "./errors";
 import { sha256, uint32toUint8Array, uint8ArrayToUint32 } from "./f";
-import { getUser, sqlInsertUser } from "./users";
+import { getInviteStatus, getUser, sqlInsertUser } from "./users";
 
 const SQL_CREATE_TABLE = `
 CREATE TABLE IF NOT EXISTS spaces (
@@ -104,6 +105,10 @@ export function createSpace(
 }
 
 export function verifyInvite(db: Database, invite: Uint8Array) {
+  const status = getInviteStatus(db, invite);
+  if (status === 1) {
+    throw new InviteAlreadyUsed();
+  }
   const message = invite.slice(0, 37);
   const signature = invite.slice(37, 101);
   const signer = invite.slice(101, 133);

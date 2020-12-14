@@ -37,12 +37,12 @@
   .logo .arrow {
     width: 1.2rem;
     display: inline-block;
-    opacity: 1;
+    overflow: hidden;
+    vertical-align: bottom;
     transition: all 0.2s;
   }
   .logo .home .arrow {
     width: 0;
-    opacity: 0;
   }
   .group {
     position: absolute;

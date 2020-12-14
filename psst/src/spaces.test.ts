@@ -11,7 +11,12 @@ import {
   sqlGetSpace,
   sqlInsertSpace,
 } from "./spaces";
-import { getSpaceByUser, getUser, sqlGetSpaceByUser } from "./users";
+import {
+  getInviteStatus,
+  getSpaceByUser,
+  getUser,
+  sqlGetSpaceByUser,
+} from "./users";
 
 describe("SQL constraints for Spaces", () => {
   let db: Database;
@@ -119,6 +124,27 @@ describe("Spaces functions", () => {
     expiry.setDate(expiry.getDate() + 7);
     const finnInvite = invite(princessBubblegum.secretKey, false, expiry);
     join(db, finn.publicKey, "Finn", finnInvite);
+    expect(() => join(db, iceKing.publicKey, "Ice King", finnInvite)).toThrow(
+      InviteAlreadyUsed
+    );
+  });
+
+  test("Return the status of an invite", () => {
+    const princessBubblegum = nacl.sign.keyPair();
+    const finn = nacl.sign.keyPair();
+    const iceKing = nacl.sign.keyPair();
+    createSpace(
+      db,
+      princessBubblegum.publicKey,
+      "Candy Kingdom",
+      "Princess Bubblegum"
+    );
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 7);
+    const finnInvite = invite(princessBubblegum.secretKey, false, expiry);
+    expect(getInviteStatus(db, finnInvite)).toEqual(0);
+    join(db, finn.publicKey, "Finn", finnInvite);
+    expect(getInviteStatus(db, finnInvite)).toEqual(1);
     expect(() => join(db, iceKing.publicKey, "Ice King", finnInvite)).toThrow(
       InviteAlreadyUsed
     );

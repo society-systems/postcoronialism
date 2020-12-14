@@ -34,6 +34,7 @@
   input,
   button {
     width: 100%;
+    margin-bottom: var(--size-m);
   }
 </style>
 

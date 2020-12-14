@@ -1,6 +1,7 @@
 import { Database } from "better-sqlite3";
 import { ConstraintError, DuplicateEntity, InviteAlreadyUsed } from "./errors";
 import { sha256, uint8ArrayToHexString } from "./f";
+import { invite } from "./spaces";
 
 const SQL_CREATE_TABLE = `
 CREATE TABLE IF NOT EXISTS users (
@@ -50,6 +51,15 @@ FROM
   users INNER JOIN spaces ON users.spaceName = spaces.name
 WHERE
   (users.publicKey = $publicKey)
+`;
+
+const SQL_USERS_INVITE_STATUS = `
+SELECT
+  COUNT(*) as count
+FROM
+  users
+WHERE
+  invite = $invite
 `;
 
 export function sqlCreateTableUsers(db: Database) {
@@ -104,6 +114,13 @@ export function sqlGetSpaceByUser(db: Database, publicKey: Uint8Array) {
   return db
     .prepare(SQL_USERS_SPACES_GET)
     .get({ publicKey: uint8ArrayToHexString(publicKey) });
+}
+
+export function getInviteStatus(db: Database, invite: Uint8Array) {
+  const result = db
+    .prepare(SQL_USERS_INVITE_STATUS)
+    .get({ invite: sha256(invite) });
+  return result["count"];
 }
 
 export function getInviteDetails(db: Database, publicKey: Uint8Array) {
