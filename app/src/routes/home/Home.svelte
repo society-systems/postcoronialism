@@ -2,7 +2,7 @@
   import Header from "./Header.svelte";
   import Admin from "./Admin.svelte";
   import { location } from "svelte-spa-router";
-  import { spaceName, space } from "../../store";
+  import { space } from "../../store";
   import Welcome from "./Welcome.svelte";
   import Jitsi from "../../components/Jitsi.svelte";
   import Pad from "../../components/Pad.svelte";
@@ -11,12 +11,14 @@
 </script>
 
 <main>
-  <section>
-    {#if $space !== undefined}
+  {#if $space !== undefined}
+    <section>
       <Header space={$space} />
-      {#if $space === false}
-        <Welcome />
-      {:else}
+    </section>
+    {#if $space === false}
+      <Welcome />
+    {:else}
+      <section>
         {#if isAdmin}
           <Admin />
         {/if}
@@ -26,7 +28,7 @@
         <section>
           <Pad name={$space.name} key={$space.etherpadKey} />
         </section-->
-      {/if}
+      </section>
     {/if}
-  </section>
+  {/if}
 </main>

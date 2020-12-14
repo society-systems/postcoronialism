@@ -1,5 +1,4 @@
 import { writable, derived, get, readable } from "svelte/store";
-import { location } from "svelte-spa-router";
 import { generateMnemonic, validateMnemonic } from "bip39";
 import nacl from "tweetnacl";
 import { Buffer } from "buffer";
@@ -19,7 +18,28 @@ import {
   getSignerFromInvite,
 } from "./crypto";
 
+const SPACE_NAME = "postcoronialism";
+
 // ACTIONS
+
+export async function login(m) {
+  if (!setMnemonic(m)) {
+    throw new Error("Invalid mnemonic");
+  }
+  const spaceKeyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(m, "/space/" + SPACE_NAME)
+  );
+  const space = await rpcGetSpace().send(spaceKeyPair);
+  if (!space) {
+    throw new Error("Not authorized");
+  }
+}
+
+export function logout() {
+  localStorage.removeItem("mnemonic");
+  setMnemonic(getMnemonic());
+}
+
 export function getMnemonic() {
   let m = localStorage.getItem("mnemonic");
   if (!validateMnemonic(m)) {
@@ -45,11 +65,6 @@ export function setMnemonic(m) {
 
 export function reloadUser() {
   reload.set(Math.random());
-}
-
-export function logout() {
-  localStorage.removeItem("mnemonic");
-  setMnemonic(getMnemonic());
 }
 
 export async function joinSpace(spaceName, userName, invite) {
@@ -117,7 +132,7 @@ const reload = writable();
 
 export const secret = readable({}, async (set) => set(await getSecret()));
 
-export const spaceName = readable("postcoronialism");
+export const spaceName = readable(SPACE_NAME);
 
 //export const spaceName = derived(location, ($location) => {
 //  const match = /^\/space\/([^\/]+)/.exec($location);

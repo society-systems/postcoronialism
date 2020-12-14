@@ -3,12 +3,19 @@
 
   export let space;
   let showMagicWords;
+  let error;
 
   function handleShowMagicWords() {
     showMagicWords = true;
   }
 
-  console.log(space);
+  function onReset() {
+    showMagicWords = false;
+  }
+
+  function onError(e) {
+    error = e;
+  }
 </script>
 
 <style>
@@ -20,12 +27,17 @@
   .group {
     position: absolute;
     right: 0;
-    width: 16rem;
+    width: 14rem;
     margin: 0 0 0 auto;
+    z-index: 10;
   }
   .group button,
   .group .button {
     width: 100%;
+  }
+  .mnemonic,
+  .admin {
+    background-color: var(--color-neutral);
   }
   .admin {
     text-transform: uppercase;
@@ -36,11 +48,13 @@
   <div class="group">
     {#if space === false}
       {#if showMagicWords}
-        <Mnemonic />
+        <Mnemonic {onReset} {onError} />
+      {:else}
+        <button class="mnemonic" on:click={handleShowMagicWords}>Enter Magic
+          Words</button>
+        <hr />
+        <a class="button" href="mailto:admin@example.org">Make Contact</a>
       {/if}
-      <button on:click={handleShowMagicWords}>Enter Magic Words</button>
-      <hr />
-      <a class="button" href="mailto:admin@example.org">Make Contact</a>
     {:else}
       {#if space.isAdmin}
         <a class="button admin" href="#/admin">Admin</a>

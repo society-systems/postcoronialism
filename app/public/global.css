@@ -11,12 +11,18 @@
 
   --color-primary: #8871ff;
   --color-secondary: #e1fe6e;
+  --color-tertiary: #f96400;
+  --color-neutral: #ccc;
 }
 
 *,
 *:before,
 *:after {
   box-sizing: inherit;
+}
+
+::selection {
+  background: #e1fe6e44;
 }
 
 html {
@@ -30,6 +36,7 @@ body {
   padding: 0;
   min-height: 100vh;
   font-family: "David Libre", serif;
+  background-color: var(--color-primary);
 }
 
 button,
@@ -59,16 +66,29 @@ input {
 button:focus,
 .button:focus,
 input:focus {
-  outline: var(--size-xs) solid var(--color-secondary);
+  outline: none;
+  /*outline: var(--size-xs) solid var(--color-secondary);*/
 }
 
 main {
-  background-color: var(--color-primary);
   min-height: 100vh;
   padding: var(--size-m);
+  display: flex;
+  flex-direction: column;
 }
 
 section {
+  width: 100%;
   max-width: 1024px;
   margin: 0 auto;
+}
+
+p {
+  font-size: 1.5rem;
+  line-height: 1.75rem;
+}
+
+/* Extra Styles */
+.neutral {
+  background-color: var(--color-neutral);
 }

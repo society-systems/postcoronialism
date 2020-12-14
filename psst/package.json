@@ -7,7 +7,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "build": "tsc",
-    "start": "node lib/index.js"
+    "start": "node lib/index.js",
+    "postbuild": "cp src/forum.sql lib"
   },
   "bin": "./lib/index.js",
   "author": "",

@@ -24,6 +24,6 @@
     "sirv-cli": "^1.0.0",
     "svelte-spa-router": "^3.0.3",
     "tweetnacl": "^1.0.3",
-    "wavesurfer": "^1.3.4"
+    "wavesurfer.js": "^4.3.0"
   }
 }
