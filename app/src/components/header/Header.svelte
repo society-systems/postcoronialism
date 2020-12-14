@@ -1,9 +1,12 @@
 <script>
+  import { location } from "svelte-spa-router";
+
   import Mnemonic from "./Mnemonic.svelte";
 
   export let space;
   let showMagicWords;
   let error;
+  $: home = $location === "/";
 
   function handleShowMagicWords() {
     showMagicWords = true;
@@ -23,9 +26,27 @@
     position: relative;
     height: 5rem;
   }
-
+  .logo {
+    font-weight: normal;
+    color: var(--color-secondary);
+  }
+  .logo a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .logo .arrow {
+    width: 1.2rem;
+    display: inline-block;
+    opacity: 1;
+    transition: all 0.2s;
+  }
+  .logo .home .arrow {
+    width: 0;
+    opacity: 0;
+  }
   .group {
     position: absolute;
+    top: 0;
     right: 0;
     width: 14rem;
     margin: 0 0 0 auto;
@@ -35,7 +56,7 @@
   .group .button {
     width: 100%;
   }
-  .mnemonic,
+  .contact,
   .admin {
     background-color: var(--color-neutral);
   }
@@ -45,6 +66,14 @@
 </style>
 
 <header>
+  {#if space}
+    <h1 class="logo">
+      <a href="#" class:home>
+        <span class="arrow">←</span>
+        <strong>post</strong>coronialism
+      </a>
+    </h1>
+  {/if}
   <div class="group">
     {#if space === false}
       {#if showMagicWords}
@@ -53,7 +82,7 @@
         <button class="mnemonic" on:click={handleShowMagicWords}>Enter Magic
           Words</button>
         <hr />
-        <a class="button" href="mailto:admin@example.org">Make Contact</a>
+        <a class="button contact" href="mailto:admin@example.org">Make Contact</a>
       {/if}
     {:else}
       {#if space.isAdmin}

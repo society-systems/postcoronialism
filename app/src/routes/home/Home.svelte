@@ -1,5 +1,4 @@
 <script>
-  import Header from "./Header.svelte";
   import Admin from "./Admin.svelte";
   import { location } from "svelte-spa-router";
   import { space } from "../../store";
@@ -10,25 +9,18 @@
   $: isAdmin = $location.endsWith("admin");
 </script>
 
-<main>
-  {#if $space !== undefined}
-    <section>
-      <Header space={$space} />
-    </section>
-    {#if $space === false}
-      <Welcome />
-    {:else}
-      <section>
-        {#if isAdmin}
-          <Admin />
-        {/if}
-        <!--section>
+{#if $space === false}
+  <Welcome />
+{:else}
+  <section>
+    {#if isAdmin}
+      <Admin />
+    {/if}
+    <!--section>
           <Jitsi name={$space.name} key={$space.jitsiKey} />
         </section>
         <section>
           <Pad name={$space.name} key={$space.etherpadKey} />
         </section-->
-      </section>
-    {/if}
-  {/if}
-</main>
+  </section>
+{/if}

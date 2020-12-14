@@ -3,6 +3,10 @@
 </script>
 
 <style>
+  .logo {
+    font-weight: normal;
+    font-size: 2rem;
+  }
   h1,
   p {
     color: white;
@@ -12,12 +16,8 @@
       width: 60%;
     }
   }
-  h1 {
-    font-weight: normal;
-    font-size: 2rem;
-  }
   .divider {
-    font-size: var(--size-s);
+    font-size: 1rem;
   }
   .banner {
     flex: 1;
@@ -25,9 +25,9 @@
 </style>
 
 <section class="banner">
-  <h1><strong>post</strong>coronialism</h1>
+  <h1 class="logo"><strong>post</strong>coronialism</h1>
 
-  <p class="divider">♡ ♥ ♠ ♣ © ☞ 〠♬♩ ♫ ☆ ☎ ■♪$☆●＋＊，＋◇◆</p>
+  <p class="divider">.--. --- ... - -.-. --- .-. --- -. .. .- .-.. .. ... --</p>
 
   <p>
     is an open collective, study, solidarity and strategy group that commonly

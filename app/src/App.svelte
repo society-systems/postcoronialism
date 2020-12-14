@@ -1,6 +1,10 @@
 <script>
   import Router from "svelte-spa-router";
 
+  import { space } from "./store";
+
+  import Header from "./components/header";
+
   import Home from "./routes/home";
   import Join from "./routes/join";
   import Logout from "./routes/logout";
@@ -13,4 +17,11 @@
   };
 </script>
 
-<Router {routes} />
+{#if $space !== undefined}
+  <main>
+    <section>
+      <Header space={$space} />
+    </section>
+    <Router {routes} />
+  </main>
+{/if}
