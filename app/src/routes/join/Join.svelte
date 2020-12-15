@@ -1,5 +1,10 @@
 <script>
-  import { joinSpace, getInviteDetails, verifyInvite } from "../../store";
+  import {
+    space,
+    joinSpace,
+    getInviteDetails,
+    verifyInvite,
+  } from "../../store";
   import { replace } from "svelte-spa-router";
 
   export let params = {};
@@ -68,18 +73,27 @@
   }
 </style>
 
-<section>
-  <h1>welcome to <strong>post</strong>coronialism</h1>
+{#if $space === undefined}
+  <section>
+    <h1>welcome to <strong>post</strong>coronialism</h1>
 
-  {#if validationStatus === true}
-    <form on:submit|preventDefault={handleJoin}>
-      <label for="name">Choose your pseudonym</label>
-      <input id="name" autocomplete="off" bind:value={userName} />
-      <button>Next</button>
-    </form>
+    {#if validationStatus === true}
+      <form on:submit|preventDefault={handleJoin}>
+        <label for="name">Choose your pseudonym</label>
+        <input id="name" autocomplete="off" bind:value={userName} />
+        <button>Next</button>
+      </form>
 
-    {#if error}
-      <p>{error}</p>
-    {/if}
-  {:else if validationStatus === false}{validationError}{/if}
-</section>
+      {#if error}
+        <p>{error}</p>
+      {/if}
+    {:else if validationStatus === false}{validationError}{/if}
+  </section>
+{:else}
+  <section>
+    <p>
+      You cannot use this invite since you are already a member.
+      <a href="#" class="button">Go back</a>
+    </p>
+  </section>
+{/if}
