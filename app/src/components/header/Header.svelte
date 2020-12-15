@@ -9,7 +9,8 @@
 
   $: home = $location === "/";
   // FIXME: there must be a better way!
-  $: showHeader = !$location.startsWith("/join");
+  $: showHeader =
+    !$location.startsWith("/join") && !$location.startsWith("/logout");
 
   function handleShowMagicWords() {
     showMagicWords = true;
