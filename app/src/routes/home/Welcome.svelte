@@ -10,6 +10,8 @@
   h1,
   p {
     color: white;
+    font-size: 1.5rem;
+    line-height: 1.75rem;
   }
   @media screen and (min-width: 768px) {
     p {

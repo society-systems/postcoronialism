@@ -19,9 +19,7 @@
 
 {#if $space !== undefined}
   <main>
-    <section>
-      <Header space={$space} />
-    </section>
+    <Header space={$space} />
     <Router {routes} />
   </main>
 {/if}

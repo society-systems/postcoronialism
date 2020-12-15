@@ -80,6 +80,10 @@ export function rpcGetSpace() {
   return call("getSpace");
 }
 
+export function rpcVerifyInvite(invite) {
+  return call("verifyInvite", invite);
+}
+
 export function rpcGetInviteDetails(user) {
   return call("getInviteDetails", user);
 }

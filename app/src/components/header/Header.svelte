@@ -6,7 +6,10 @@
   export let space;
   let showMagicWords;
   let error;
+
   $: home = $location === "/";
+  // FIXME: there must be a better way!
+  $: showHeader = !$location.startsWith("/join");
 
   function handleShowMagicWords() {
     showMagicWords = true;
@@ -40,6 +43,7 @@
     overflow: hidden;
     vertical-align: bottom;
     transition: all 0.2s;
+    transition-delay: 0.2s;
   }
   .logo .home .arrow {
     width: 0;
@@ -65,31 +69,36 @@
   }
 </style>
 
-<header>
-  {#if space}
-    <h1 class="logo">
-      <a href="#" class:home>
-        <span class="arrow">←</span>
-        <strong>post</strong>coronialism
-      </a>
-    </h1>
-  {/if}
-  <div class="group">
-    {#if space === false}
-      {#if showMagicWords}
-        <Mnemonic {onReset} {onError} />
-      {:else}
-        <button class="mnemonic" on:click={handleShowMagicWords}>Enter Magic
-          Words</button>
-        <hr />
-        <a class="button contact" href="mailto:admin@example.org">Make Contact</a>
+{#if showHeader}
+  <section>
+    <header>
+      {#if space}
+        <h1 class="logo">
+          <a href="#" class:home>
+            <span class="arrow">←</span>
+            <strong>post</strong>coronialism
+          </a>
+        </h1>
       {/if}
-    {:else}
-      {#if space.isAdmin}
-        <a class="button admin" href="#/admin">Admin</a>
-        <hr />
-      {/if}
-      <a class="button" href="#/logout">Exit Space</a>
-    {/if}
-  </div>
-</header>
+      <div class="group">
+        {#if space === false}
+          {#if showMagicWords}
+            <Mnemonic {onReset} {onError} />
+          {:else}
+            <button class="mnemonic" on:click={handleShowMagicWords}>Enter Magic
+              Words</button>
+            <hr />
+            <a class="button contact" href="mailto:admin@example.org">Make
+              Contact</a>
+          {/if}
+        {:else}
+          {#if space.isAdmin}
+            <a class="button admin" href="#/admin">Admin</a>
+            <hr />
+          {/if}
+          <a class="button" href="#/logout">Exit Space</a>
+        {/if}
+      </div>
+    </header>
+  </section>
+{/if}

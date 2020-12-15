@@ -10,6 +10,7 @@ import {
   rpcGetSecret,
   rpcSetSecret,
   rpcGetInviteDetails,
+  rpcVerifyInvite,
 } from "./rpc";
 import {
   generateDeterministicSeed,
@@ -79,6 +80,10 @@ export async function joinSpace(spaceName, userName, invite) {
 export async function createSpace(spaceName, userName) {
   await rpcCreateSpace(spaceName, userName).send(get(keyPair));
   reloadUser();
+}
+
+export async function verifyInvite(invite) {
+  return await rpcVerifyInvite(invite).send(get(keyPair));
 }
 
 export async function getInviteDetails(invite) {
