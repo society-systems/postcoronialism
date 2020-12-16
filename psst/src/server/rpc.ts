@@ -37,7 +37,8 @@ export default function rpc(context: IContext) {
   }
 
   function rpcVerifyInvite(_: string, invite: string) {
-    return verifyInvite(db, hexStringToUint8Array(invite));
+    verifyInvite(db, hexStringToUint8Array(invite));
+    return true;
   }
 
   function rpcGetSpace(user: string) {

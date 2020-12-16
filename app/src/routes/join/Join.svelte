@@ -73,7 +73,7 @@
   }
 </style>
 
-{#if $space === undefined}
+{#if $space === false}
   <section>
     <h1>welcome to <strong>post</strong>coronialism</h1>
 
