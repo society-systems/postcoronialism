@@ -183,3 +183,5 @@ export const space = derived(
     }
   }
 );
+
+export const inMeeting = writable(false);

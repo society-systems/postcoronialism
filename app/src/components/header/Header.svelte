@@ -28,7 +28,8 @@
 <style>
   header {
     position: relative;
-    height: 5rem;
+    height: 6rem;
+    margin-bottom: var(--size-m);
   }
   .logo {
     font-weight: normal;

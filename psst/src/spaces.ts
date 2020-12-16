@@ -96,8 +96,8 @@ export function createSpace(
     sqlInsertSpace(
       db,
       spaceName,
-      sha256(nacl.randomBytes(32)) + "-keep",
-      sha256(nacl.randomBytes(32)).substr(0, 32)
+      sha256(nacl.randomBytes(32)),
+      sha256(nacl.randomBytes(32)).substr(0, 32) + "-keep"
     );
     sqlInsertUser(db, user, spaceName, name, true, user);
   });
