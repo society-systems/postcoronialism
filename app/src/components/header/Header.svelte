@@ -1,5 +1,6 @@
 <script>
   import { location } from "svelte-spa-router";
+  import { inMeeting } from "../../store";
 
   import Mnemonic from "./Mnemonic.svelte";
 
@@ -22,6 +23,12 @@
 
   function onError(e) {
     error = e;
+  }
+
+  function handleLogout(e) {
+    if ($inMeeting && !confirm("Leave the meeting?")) {
+      e.preventDefault();
+    }
   }
 </script>
 
@@ -98,7 +105,7 @@
             <a class="button admin" href="#/admin">Admin</a>
             <hr />
           {/if}
-          <a class="button" href="#/logout">Exit Space</a>
+          <a on:click={handleLogout} class="button" href="#/logout">Exit Space</a>
         {/if}
       </div>
     </header>

@@ -46,6 +46,7 @@
       },
       interfaceConfigOverwrite: {
         HIDE_INVITE_MORE_HEADER: true,
+        SHOW_CHROME_EXTENSION_BANNER: false,
         TOOLBAR_BUTTONS: [
           "microphone",
           "camera",
