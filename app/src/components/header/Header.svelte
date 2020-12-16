@@ -26,8 +26,12 @@
   }
 
   function handleLogout(e) {
-    if ($inMeeting && !confirm("Leave the meeting?")) {
-      e.preventDefault();
+    if ($inMeeting) {
+      if (confirm("Leave the meeting?")) {
+        $inMeeting = false;
+      } else {
+        e.preventDefault();
+      }
     }
   }
 </script>
