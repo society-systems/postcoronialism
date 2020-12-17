@@ -2,14 +2,18 @@
     import { prettyDate, toDateTime, toFullDate } from "./utils";
     import AddPost from "./AddPost.svelte";
     import Markdown from "../Markdown.svelte";
-    import { getPost, getPosts } from "../../store";
+    import { getPost, getPosts, markPostAsSeen, publicKey } from "../../store";
     export let id;
 
     let postPromise = getPost(id);
-    let repliesPromise = getPosts(id, 10, 0);
+    let repliesPromise = getPosts(id, 1000, 0);
+
+    setTimeout(() => {
+        markPostAsSeen(id);
+    }, 1000);
 
     function onReply(replyId) {
-        repliesPromise = getPosts(id, 10, 0);
+        repliesPromise = getPosts(id, 1000, 0);
     }
 </script>
 
@@ -31,13 +35,23 @@
         margin-bottom: var(--size-l);
     }
     .metadata {
-        font-family: monospace;
-        padding: var(--size-s) var(--size-m);
-        font-size: 0.9rem;
-        margin: 0;
         color: var(--color-secondary);
         border-bottom: var(--size-xxs) solid var(--color-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
     }
+    .metadata.new {
+        color: var(--color-tertiary);
+    }
+    .metadata p,
+    .metadata .controls {
+        font-family: monospace;
+        font-size: 0.9rem;
+        padding: var(--size-s) var(--size-m);
+        margin: 0;
+    }
+
     .metadata,
     .body {
         background: #00000033;
@@ -53,15 +67,20 @@
 {#await postPromise then post}
     <div class="post">
         <h1>{post.title}</h1>
-        <p class="metadata">
-            <strong>{post.name}</strong>
-            commented
-            <time
-                title={toFullDate(post.ts * 1000)}
-                datetime={toDateTime(post.ts * 1000)}>
-                {prettyDate(post.ts * 1000)}
-            </time>
-        </p>
+        <div class="metadata">
+            <p>
+                <strong>{post.name}</strong>
+                commented
+                <time
+                    title={toFullDate(post.ts * 1000)}
+                    datetime={toDateTime(post.ts * 1000)}>
+                    {prettyDate(post.ts * 1000)}
+                </time>
+            </p>
+            {#if post.publicKey === $publicKey}
+                <div class="controls"><a>Edit</a> <a>Delete</a></div>
+            {/if}
+        </div>
         <div class="body">
             <Markdown text={post.body} />
         </div>
@@ -69,17 +88,27 @@
     <div class="replies">
         {#await repliesPromise then replies}
             <ol>
-                {#each replies as reply}
+                {#each replies.reverse() as reply}
                     <li>
-                        <p class="metadata">
-                            <strong>{reply.name}</strong>
-                            commented
-                            <time
-                                title={toFullDate(reply.ts * 1000)}
-                                datetime={toDateTime(reply.ts * 1000)}>
-                                {prettyDate(reply.ts * 1000)}
-                            </time>
-                        </p>
+                        <div
+                            class="metadata"
+                            class:new={reply.ts > post.seenTs}>
+                            <p>
+                                <strong>{reply.name}</strong>
+                                commented
+                                <time
+                                    title={toFullDate(reply.ts * 1000)}
+                                    datetime={toDateTime(reply.ts * 1000)}>
+                                    {prettyDate(reply.ts * 1000)}
+                                </time>
+                            </p>
+                            {#if reply.publicKey === $publicKey}
+                                <div class="controls">
+                                    <a>Edit</a>
+                                    <a>Delete</a>
+                                </div>
+                            {/if}
+                        </div>
                         <div class="body">
                             <Markdown text={reply.body} />
                         </div>
@@ -91,7 +120,9 @@
         {/await}
     </div>
 
-    <p class="metadata">Your reply</p>
+    <div class="metadata">
+        <p>Your reply</p>
+    </div>
     <AddPost replyTo={id} onSuccess={onReply} />
 {:catch error}
     {error.message}

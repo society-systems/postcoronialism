@@ -2,7 +2,7 @@
     import { getPosts } from "../../store";
     import { prettyDate, toDateTime, toFullDate } from "./utils";
 
-    let posts = getPosts(0, 100, 0);
+    let posts = getPosts(0, 1000, 0);
 </script>
 
 <style>
@@ -22,8 +22,12 @@
         display: flex;
         border: var(--size-xxs) solid var(--color-secondary);
         border-bottom: none;
-        padding: 0 var(--size-m);
+        padding: 0 var(--size-l);
         align-items: baseline;
+    }
+
+    li.new {
+        background: var(--color-tertiary);
     }
 
     li:last-child {
@@ -31,22 +35,22 @@
     }
 
     .title {
+        position: relative;
         flex: 7;
     }
 
     .name,
     .activity {
         font-family: monospace;
+        font-size: 0.9rem;
     }
 
     .name {
         flex: 1;
-        font-size: 1rem;
     }
 
     .activity {
         flex: 2;
-        font-size: 1rem;
         text-align: right;
     }
 </style>
@@ -54,7 +58,7 @@
 {#await posts then values}
     <ol>
         {#each values as post}
-            <li>
+            <li class:new={!post.seen}>
                 <p class="title">
                     <a href="#/forum/posts/{post.id}">{post.title}</a>
                 </p>

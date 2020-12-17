@@ -13,8 +13,8 @@ const SQL_STATEMENTS = fs.readFileSync(
 );
 
 const SQL_SEEN_INSERT = `
-INSERT INTO seen (publicKey, threadId)
-VALUES ($publicKey, $threadId)
+INSERT OR REPLACE INTO seen (publicKey, threadId, ts)
+VALUES ($publicKey, $threadId, strftime('%s', 'now'))
 `;
 
 const SQL_SEEN_DELETE = `
@@ -79,8 +79,8 @@ SELECT
     users.name,
     users.publicKey,
     seen.ts AS seenTs,
-    MAX(posts.ts, IFNULL(replies.ts, 0)) AS lastTs,
-    seen.ts >= MAX(replies.ts) AS seen
+    MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS lastTs,
+    seen.ts >= MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS seen
 
 FROM
     posts
@@ -195,6 +195,8 @@ export function sqlSeenInsert(
   } catch (e) {
     if (e.toString() === "SqliteError: FOREIGN KEY constraint failed") {
       throw new Unauthorized();
+    } else {
+      throw e;
     }
   }
 }

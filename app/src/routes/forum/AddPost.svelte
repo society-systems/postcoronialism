@@ -1,8 +1,9 @@
 <script>
     import AddPost from "../../components/forum/AddPost.svelte";
+    import { push } from "svelte-spa-router";
 
     function onSuccess(postId) {
-        console.log("got post id", postId);
+        push("/forum/posts/" + postId);
     }
 </script>
 
