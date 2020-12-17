@@ -79,14 +79,26 @@ SELECT
     users.name,
     users.publicKey,
     seen.ts AS seenTs,
-    MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS lastTs,
-    seen.ts >= MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS seen
+    MAX(IFNULL(replies.ts, posts.ts)) AS lastTs,
+    -- MAX(IFNULL(timestamps.lastTs, posts.ts)) AS lastTs2,
+    seen.ts >= MAX(IFNULL(timestamps.lastTs, posts.ts)) AS seen
+    -- MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS lastTs,
+    -- seen.ts >= MAX(MAX(posts.ts), MAX(IFNULL(replies.ts, 0))) AS seen
 
 FROM
     posts
     INNER JOIN users
         ON posts.spaceName = users.spaceName
             AND posts.publicKey = users.publicKey
+    LEFT OUTER JOIN (
+        SELECT posts.id, MAX(max(posts.ts), max(IFNULL(replies.ts, 0))) as lastTs
+        FROM posts
+        LEFT OUTER JOIN posts as replies
+        ON posts.id = replies.parentId
+        WHERE replies.publicKey IS NOT $publicKey
+        GROUP BY posts.id
+      ) AS timestamps
+        ON posts.id = timestamps.id
     LEFT OUTER JOIN posts AS replies
         on posts.id = replies.parentId
     LEFT OUTER JOIN seen
