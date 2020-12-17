@@ -4,6 +4,15 @@ import { hexStringToUint8Array, uint8ArrayToHexString } from "../f";
 import { getSecret, setSecret } from "../secrets";
 import { createSpace, hasSpace, join, verifyInvite } from "../spaces";
 import { getSpaceByUser, getInviteDetails } from "../users";
+import {
+  addPost,
+  editPost,
+  deletePost,
+  getPost,
+  getPosts,
+  markPostAsSeen,
+  markPostAsUnseen,
+} from "../forum";
 import { IRPCContext } from "./jsonrpc";
 
 function callbackify(f: any) {
@@ -78,6 +87,44 @@ export default function rpc(context: IContext) {
     );
   }
 
+  function rpcAddPost(
+    user: string,
+    parentId: string,
+    title: string,
+    body: string
+  ) {
+    return addPost(db, hexStringToUint8Array(user), parentId, title, body);
+  }
+
+  function rpcEditPost(user: string, id: string, title: string, body: string) {
+    return editPost(db, hexStringToUint8Array(user), id, title, body);
+  }
+
+  function rpcDeletePost(user: string, id: string) {
+    return deletePost(db, hexStringToUint8Array(user), id);
+  }
+
+  function rpcGetPost(user: string, id: string) {
+    return getPost(db, hexStringToUint8Array(user), id);
+  }
+
+  function rpcMarkPostAsSeen(user: string, id: string) {
+    return markPostAsSeen(db, hexStringToUint8Array(user), id);
+  }
+
+  function rpcMarkPostAsUnseen(user: string, id: string) {
+    return markPostAsUnseen(db, hexStringToUint8Array(user), id);
+  }
+
+  function rpcGetPosts(
+    user: string,
+    parentId: string,
+    limit: number,
+    offset: number
+  ) {
+    return getPosts(db, hexStringToUint8Array(user), parentId, limit, offset);
+  }
+
   return {
     joinSpace: callbackify(rpcJoinSpace),
     getSpace: callbackify(rpcGetSpace),
@@ -87,5 +134,12 @@ export default function rpc(context: IContext) {
     createSpace: callbackify(rpcCreateSpace),
     getSecret: callbackify(rpcGetSecret),
     setSecret: callbackify(rpcSetSecret),
+    addPost: callbackify(rpcAddPost),
+    editPost: callbackify(rpcEditPost),
+    deletePost: callbackify(rpcDeletePost),
+    getPost: callbackify(rpcGetPost),
+    markPostAsSeen: callbackify(rpcMarkPostAsSeen),
+    markPostAsUnseen: callbackify(rpcMarkPostAsUnseen),
+    getPosts: callbackify(rpcGetPosts),
   };
 }

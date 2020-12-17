@@ -116,7 +116,7 @@ export function verifyInvite(db: Database, invite: Uint8Array) {
   const isAdmin = invite.slice(32, 33)[0] === 1;
   const expiry = new Date(uint8ArrayToUint32(invite.slice(33, 37)) * 1000);
   const signerUser = getUser(db, signer);
-  if (!signer || !signerUser.isAdmin) {
+  if (!signer || !signerUser || !signerUser.isAdmin) {
     throw new InvalidSigner();
   }
   if (!nacl.sign.detached.verify(message, signature, signer)) {
