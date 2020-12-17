@@ -52,8 +52,14 @@ h3 {
   font-size: 1.3rem;
 }
 
+a,
+a:visited {
+  color: inherit;
+}
+
 button,
-.button {
+.button,
+a.button {
   position: relative;
   border: 0;
   cursor: pointer;
@@ -92,13 +98,29 @@ button:disabled,
   text-decoration: line-through;
 }
 
-input {
+input,
+textarea {
   color: white;
   background-color: #ffffff33;
   font-family: monospace;
   border: none;
-  border-bottom: var(--size-xs) solid var(--color-secondary);
+  border-width: var(--size-xs);
+  border-color: var(--color-secondary);
   padding: var(--size-s) var(--size-m);
+}
+
+::placeholder {
+  color: white;
+  font-style: italic;
+}
+
+input {
+  border-bottom-style: solid;
+}
+
+textarea {
+  /*border-left-style: solid;*/
+  resize: vertical;
 }
 
 input[type="checkbox"] {
@@ -109,7 +131,8 @@ input[type="checkbox"] {
 
 button:focus,
 .button:focus,
-input:focus {
+input:focus,
+textarea {
   outline: none;
   /*outline: var(--size-xs) solid var(--color-secondary);*/
 }

@@ -95,3 +95,31 @@ export function rpcHasSpace(spaceName) {
 export function rpcCreateSpace(spaceName, userName) {
   return call("createSpace", spaceName, userName);
 }
+
+export function rpcAddPost(parentId, title, body) {
+  return call("addPost", parentId, title, body);
+}
+
+export function rpcEditPost(id, title, body) {
+  return call("editPost", id, title, body);
+}
+
+export function rpcDeletePost(id) {
+  return call("deletePost", id);
+}
+
+export function rpcGetPost(id) {
+  return call("getPost", id);
+}
+
+export function rpcMarkPostAsSeen(id) {
+  return call("markPostAsSeen", id);
+}
+
+export function rpcMarkPostAsUnseen(id) {
+  return call("markPostAsUnseen", id);
+}
+
+export function rpcGetPosts(parentId, limit, offset) {
+  return call("getPosts", parentId, limit, offset);
+}

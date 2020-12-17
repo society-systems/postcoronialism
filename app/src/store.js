@@ -11,6 +11,13 @@ import {
   rpcSetSecret,
   rpcGetInviteDetails,
   rpcVerifyInvite,
+  rpcAddPost,
+  rpcDeletePost,
+  rpcEditPost,
+  rpcGetPost,
+  rpcGetPosts,
+  rpcMarkPostAsSeen,
+  rpcMarkPostAsUnseen,
 } from "./rpc";
 import {
   generateDeterministicSeed,
@@ -20,6 +27,7 @@ import {
 } from "./crypto";
 
 const SPACE_NAME = "postcoronialism";
+const PATH_SPACE_NAME = "/space/" + SPACE_NAME;
 
 // ACTIONS
 
@@ -129,6 +137,62 @@ export async function getSecret() {
 export async function updateSecret(json) {
   const current = await getSecret();
   await setSecret({ ...current, ...json });
+}
+
+export async function addPost(parentId, title, body) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcAddPost(parentId, title, body).send(keyPair);
+}
+
+export async function editPost(id, title, body) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcEditPost(id, title, body).send(keyPair);
+}
+
+export async function deletePost(id) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcDeletePost(id).send(keyPair);
+}
+
+export async function getPost(id) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcGetPost(id).send(keyPair);
+}
+
+export async function markPostAsSeen(id) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcMarkPostAsSeen(id).send(keyPair);
+}
+
+export async function markPostAsUnseen(id) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcMarkPostAsUnseen(id).send(keyPair);
+}
+
+export async function getPosts(parentId, limit, offset) {
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+  return await rpcGetPosts(parentId, limit, offset).send(keyPair);
 }
 
 // STORES

@@ -101,7 +101,7 @@ GROUP BY
     posts.id
 
 ORDER BY
-    CASE WHEN LENGTH($parentId) THEN lastTs ELSE 0 END,
+    -- CASE WHEN LENGTH($parentId) THEN lastTs ELSE 0 END,
     lastTs DESC
 
 LIMIT
