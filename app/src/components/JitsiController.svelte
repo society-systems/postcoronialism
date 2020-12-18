@@ -8,8 +8,15 @@
   let detachedWidth = "250px";
   let detachedHeight = "150px";
 
-  $: show = $space && ["/", "/admin"].includes($location);
-  $: detached = $location === "/admin";
+  let detached;
+
+  $: show =
+    $space &&
+    (["/", "/admin"].includes($location) || $location.startsWith("/forum"));
+  $: {
+    detached =
+      detached || $location.startsWith("/forum") || $location === "/admin";
+  }
   $: showPlaceholder = $location === "/";
 
   function handleJoin() {
@@ -57,7 +64,7 @@
       <Jitsi
         name={$space.name}
         key={$space.jitsiKey}
-        {detached}
+        bind:detached
         {showPlaceholder}
         {width}
         {height}

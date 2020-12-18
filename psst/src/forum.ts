@@ -1,6 +1,5 @@
 import { Database } from "better-sqlite3";
 import nacl from "tweetnacl";
-import { db } from "./db";
 import { Unauthorized } from "./errors";
 import { sha256, uint8ArrayToHexString } from "./f";
 import { getUser } from "./users";
