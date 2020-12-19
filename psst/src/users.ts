@@ -1,7 +1,6 @@
 import { Database } from "better-sqlite3";
 import { ConstraintError, DuplicateEntity, InviteAlreadyUsed } from "./errors";
 import { sha256, uint8ArrayToHexString } from "./f";
-import { invite } from "./spaces";
 
 const SQL_CREATE_TABLE = `
 CREATE TABLE IF NOT EXISTS users (

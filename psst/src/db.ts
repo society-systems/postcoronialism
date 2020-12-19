@@ -3,6 +3,7 @@ import { sqlCreateTableSpaces } from "./spaces";
 import { sqlCreateTableUsers } from "./users";
 import { sqlCreateTableSecrets } from "./secrets";
 import { sqlCreateTablePosts } from "./forum";
+import { sqlCreateTableSubscriptions } from "./subscriptions";
 
 const SQL_PRAGMA_FOREIGN_KEYS = `PRAGMA foreign_keys = ON`;
 const SQL_PRAGMA_RECURSIVE_TRIGGERS = `PRAGMA recursive_triggers = ON`;
@@ -19,5 +20,6 @@ export function init(location?: string) {
   sqlCreateTableUsers(database);
   sqlCreateTableSecrets(database);
   sqlCreateTablePosts(database);
+  sqlCreateTableSubscriptions(database);
   return database;
 }
