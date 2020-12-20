@@ -123,3 +123,11 @@ export function rpcMarkPostAsUnseen(id) {
 export function rpcGetPosts(parentId, limit, offset) {
   return call("getPosts", parentId, limit, offset);
 }
+
+export function rpcGetVapidPublicKey() {
+  return call("getVapidPublicKey");
+}
+
+export function rpcAddSubscription(subscription) {
+  return call("addSubscription", subscription);
+}

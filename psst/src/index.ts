@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import { Command } from "commander";
 import { getContext } from "./context";
 

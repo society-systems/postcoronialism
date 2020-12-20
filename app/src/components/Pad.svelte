@@ -9,7 +9,7 @@
   }
 </style>
 
-<iframe
+<!--iframe
   title="Collaborative pad"
   src="https://pad.riseup.net/p/{key}?userName={name}"
-  width="100%" />
+  width="100%" /-->

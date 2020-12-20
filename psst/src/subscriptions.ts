@@ -1,5 +1,12 @@
 import { Database } from "better-sqlite3";
+import webpush from "web-push";
 import { sha256, uint8ArrayToHexString } from "./f";
+
+webpush.setVapidDetails(
+  "mailto:" + process.env.VAPID_EMAIL || "",
+  process.env.VAPID_PUBLIC_KEY || "",
+  process.env.VAPID_PRIVATE_KEY || ""
+);
 
 const SQL_CREATE_TABLE = `
 CREATE TABLE IF NOT EXISTS subscriptions (
@@ -62,4 +69,40 @@ export function sqlGetSubscriptionsBySpace(db: Database, spaceName: string) {
       publicKey: record.publicKey,
       subscription: JSON.parse(record.subscription),
     }));
+}
+
+export function getVapidPublicKey() {
+  return process.env.VAPID_PUBLIC_KEY || "";
+}
+
+export function addSubscription(
+  db: Database,
+  user: Uint8Array,
+  subscription: any
+) {
+  sqlInsertSubscription(db, user, subscription);
+}
+
+export async function sendNotifications(
+  db: Database,
+  spaceName: string,
+  user: string,
+  message: string
+) {
+  const records = sqlGetSubscriptionsBySpace(db, spaceName);
+  for (let { publicKey, subscription } of records) {
+    if (publicKey !== user) {
+      console.log("Send notification to", publicKey);
+      try {
+        await webpush.sendNotification(subscription, message);
+      } catch (e) {
+        if (e.statusCode === 410) {
+          console.log("Subscription no longer valid");
+          sqlDeleteSubscription(db, subscription);
+        } else {
+          console.log(e);
+        }
+      }
+    }
+  }
 }

@@ -1,8 +1,9 @@
 <script>
   import Router from "svelte-spa-router";
 
-  import { space } from "./store";
+  import { space, subscribeToNotifications } from "./store";
 
+  import EnableNotifications from "./components/EnableNotifications.svelte";
   import Header from "./components/header";
   import JitsiController from "./components/JitsiController.svelte";
 
@@ -27,6 +28,7 @@
 
 {#if $space !== undefined}
   <main>
+    <EnableNotifications />
     <Header space={$space} />
     <JitsiController />
     <Router {routes} />

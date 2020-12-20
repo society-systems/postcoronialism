@@ -18,6 +18,8 @@ import {
   rpcGetPosts,
   rpcMarkPostAsSeen,
   rpcMarkPostAsUnseen,
+  rpcGetVapidPublicKey,
+  rpcAddSubscription,
 } from "./rpc";
 import {
   generateDeterministicSeed,
@@ -26,8 +28,8 @@ import {
   getSignerFromInvite,
 } from "./crypto";
 
-const SPACE_NAME = "postcoronialism";
-const PATH_SPACE_NAME = "/space/" + SPACE_NAME;
+export const SPACE_NAME = "postcoronialism";
+export const PATH_SPACE_NAME = "/space/" + SPACE_NAME;
 
 // ACTIONS
 
@@ -195,6 +197,40 @@ export async function getPosts(parentId, limit, offset) {
   return await rpcGetPosts(parentId, limit, offset).send(keyPair);
 }
 
+export async function requestNotificationPermission() {
+  const permission = await window.Notification.requestPermission();
+  // value of permission can be 'granted', 'default', 'denied'
+  // granted: user has accepted the request
+  // default: user has dismissed the notification permission popup by clicking on x
+  // denied: user has denied the request.
+  console.log("Notification permission", permission);
+  if (permission !== "granted") {
+    throw new Error("Permission not granted for Notification");
+  }
+}
+
+export async function subscribeToNotifications() {
+  const worker = navigator.serviceWorker.controller;
+  const mnemonic = getMnemonic();
+  const keyPair = nacl.sign.keyPair.fromSeed(
+    generateDeterministicSeed(mnemonic, PATH_SPACE_NAME)
+  );
+
+  await requestNotificationPermission();
+  const publicKey = await rpcGetVapidPublicKey().send(keyPair);
+
+  const messageChannel = new MessageChannel();
+  messageChannel.port1.onmessage = (event) => {
+    console.log("Reply from Service Worker", event.data); // this comes from the ServiceWorker
+    if (event.data.subscription) {
+      rpcAddSubscription(event.data.subscription).send(keyPair);
+    }
+  };
+  worker.postMessage({ action: "subscribe", publicKey }, [
+    messageChannel.port2,
+  ]);
+}
+
 // STORES
 export const mnemonic = writable(getMnemonic());
 const reload = writable();
@@ -249,3 +285,14 @@ export const space = derived(
 );
 
 export const inMeeting = writable(false);
+
+export const notifications = writable(undefined, async (set) => {
+  await navigator.serviceWorker.ready;
+  const worker = navigator.serviceWorker.controller;
+  const messageChannel = new MessageChannel();
+  messageChannel.port1.onmessage = (event) => {
+    console.log("Reply from Service Worker", event.data); // this comes from the ServiceWorker
+    set(!!event.data.subscription);
+  };
+  worker.postMessage({ action: "getSubscription" }, [messageChannel.port2]);
+});

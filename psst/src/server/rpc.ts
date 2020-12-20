@@ -14,6 +14,7 @@ import {
   markPostAsUnseen,
 } from "../forum";
 import { IRPCContext } from "./jsonrpc";
+import { addSubscription, getVapidPublicKey } from "../subscriptions";
 
 function callbackify(f: any) {
   return (args: any, context: IRPCContext, callback: any) => {
@@ -125,6 +126,14 @@ export default function rpc(context: IContext) {
     return getPosts(db, hexStringToUint8Array(user), parentId, limit, offset);
   }
 
+  function rpcGetVapidPublicKey() {
+    return getVapidPublicKey();
+  }
+
+  function rpcAddSubscription(user: string, subscription: string) {
+    return addSubscription(db, hexStringToUint8Array(user), subscription);
+  }
+
   return {
     joinSpace: callbackify(rpcJoinSpace),
     getSpace: callbackify(rpcGetSpace),
@@ -141,5 +150,7 @@ export default function rpc(context: IContext) {
     markPostAsSeen: callbackify(rpcMarkPostAsSeen),
     markPostAsUnseen: callbackify(rpcMarkPostAsUnseen),
     getPosts: callbackify(rpcGetPosts),
+    getVapidPublicKey: callbackify(rpcGetVapidPublicKey),
+    addSubscription: callbackify(rpcAddSubscription),
   };
 }
